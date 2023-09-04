@@ -60,6 +60,10 @@ import io.reactivex.rxjava3.core.Flowable;
  */
 public class FPVInteractionWidgetModel extends WidgetModel implements ICameraIndex {
 
+    //region Constants
+    private static final int NUM_ROWS = 8;
+    private static final int NUM_COLUMNS = 12;
+    //endregion
     private final DataProcessor<SettingDefinitions.ControlMode> controlModeProcessor;
     private final DataProcessor<CameraMeteringMode> meteringModeProcessor;
     private final DataProcessor<Boolean> aeLockedProcessor;
@@ -71,7 +75,7 @@ public class FPVInteractionWidgetModel extends WidgetModel implements ICameraInd
     private int gimbalIndex;
     private CameraLensType lensIndex = CameraLensType.CAMERA_LENS_WIDE;
     private DJIKey<DoublePoint2D> focusTargetKey;
-    private DJIKey<DoublePoint2D> meteringPointKey;
+    private DJIKey<IntPoint2D> meteringTargetKey;
     private DJIKey<CameraMeteringMode> meteringModeKey;
     private UXKey controlModeKey;
     //endregion
@@ -98,7 +102,7 @@ public class FPVInteractionWidgetModel extends WidgetModel implements ICameraInd
     @Override
     protected void inSetup() {
         focusTargetKey = KeyTools.createCameraKey(CameraKey.KeyCameraFocusTarget, cameraIndex, lensIndex);
-        meteringPointKey = KeyTools.createCameraKey(CameraKey.KeySpotMeteringPoint, cameraIndex, lensIndex);
+        meteringTargetKey = KeyTools.createCameraKey(CameraKey.KeySpotMeteringTargetPoint, cameraIndex, lensIndex);
         meteringModeKey = KeyTools.createCameraKey(CameraKey.KeyCameraMeteringMode, cameraIndex, lensIndex);
         bindDataProcessor(meteringModeKey, meteringModeProcessor, this::setMeteringMode);
         bindDataProcessor(KeyTools.createCameraKey(CameraKey.KeyAELockEnabled, cameraIndex, lensIndex), aeLockedProcessor);
@@ -243,7 +247,18 @@ public class FPVInteractionWidgetModel extends WidgetModel implements ICameraInd
     public Completable updateMetering(@FloatRange(from = 0, to = 1) float targetX,
                                       @FloatRange(from = 0, to = 1) float targetY) {
         if (controlModeProcessor.getValue() == SettingDefinitions.ControlMode.SPOT_METER) {
-            return djiSdkModel.setValue(meteringPointKey, new DoublePoint2D((double) targetX, (double) targetY));
+            //Converting target to position in grid
+            int column = (int) (targetX * NUM_COLUMNS);
+            int row = (int) (targetY * NUM_ROWS);
+            if (column >= 0 && column < NUM_COLUMNS && row >= 0 && row < NUM_ROWS) {
+                if (meteringModeProcessor.getValue() != CameraMeteringMode.REGION) {
+                    return djiSdkModel.setValue(meteringModeKey, CameraMeteringMode.REGION)
+                            .andThen(djiSdkModel.setValue(meteringTargetKey, createPoint(column, row)));
+                } else {
+                    return djiSdkModel.setValue(meteringTargetKey, createPoint(column, row));
+
+                }
+            }
         } else if (controlModeProcessor.getValue() == SettingDefinitions.ControlMode.CENTER_METER) {
             return djiSdkModel.setValue(meteringModeKey, CameraMeteringMode.CENTER);
         }

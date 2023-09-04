@@ -39,6 +39,7 @@ class MSDKInfoVm : DJIViewModel() {
     private val msdkInfoModel: MSDKInfoModel = MSDKInfoModel()
     private var areaCodeChangeListener: AreaCodeChangeListener
     private var netWorkStatusListener: IDJINetworkStatusListener
+    var leicaController: LeicaControllerVM = LeicaControllerVM()
 
     init {
         msdkInfo.value = MSDKInfo(msdkInfoModel.getSDKVersion())
@@ -47,6 +48,7 @@ class MSDKInfoVm : DJIViewModel() {
         msdkInfo.value?.packageProductCategory = msdkInfoModel.getPackageProductCategory()
         msdkInfo.value?.isLDMEnabled = LDMManager.getInstance().isLDMEnabled.toString()
         msdkInfo.value?.isLDMLicenseLoaded = LDMManager.getInstance().isLDMLicenseLoaded.toString()
+        msdkInfo.value?.tsConnection = leicaController.isConnected
         msdkInfo.value?.coreInfo = msdkInfoModel.getCoreInfo()
 
         areaCodeChangeListener = AreaCodeChangeListener { _, changed ->

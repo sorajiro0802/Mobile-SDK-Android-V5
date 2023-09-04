@@ -111,9 +111,6 @@ public class WidgetView extends ConstraintLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (widgetViewHolder == null) {
-            return;
-        }
         currentSizeTextView.setText(widgetViewHolder.getWidgetSize());
     }
 

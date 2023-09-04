@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dji.sampleV5.modulecommon">
 
+
     <!-- Google Maps -->
     <meta-data
         android:name="com.google.android.geo.API_KEY"
@@ -10,4 +11,7 @@
     <meta-data
         android:name="com.amap.api.v2.apikey"
         android:value="${AMAP_API_KEY}" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 </manifest>

@@ -23,6 +23,8 @@ import dji.v5.utils.common.JsonUtil
 import dji.v5.utils.common.LogUtils
 import dji.v5.utils.common.ToastUtils
 import kotlinx.android.synthetic.main.frag_virtual_stick_page.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlin.math.abs
 
 /**
@@ -53,6 +55,7 @@ class VirtualStickFragment : DJIFragment() {
         widget_horizontal_situation_indicator.setSimpleModeEnable(false)
         initBtnClickListener()
         initStickListener()
+        selfDriveBtnListener()
         virtualStickVM.listenRCStick()
         virtualStickVM.currentSpeedLevel.observe(viewLifecycleOwner) {
             updateVirtualStickInfo()
@@ -165,9 +168,56 @@ class VirtualStickFragment : DJIFragment() {
         }
     }
 
+    private fun selfDriveBtnListener() {
+        fun goStraight(p: Float, duration: Long){
+            println("Go Straight!!!")
+            runBlocking {
+                // 右のvirtual stickを真っ直ぐに倒す ： 直進する
+                virtualStickVM.setRightPosition(
+                    0,
+                    (p * Stick.MAX_STICK_POSITION_ABS).toInt())
+                delay(duration)
+            }
+            // 直進した後，スティックを中央に戻す
+            virtualStickVM.setRightPosition(0, 0)
+        }
+        fun turnRight(p:Float, duration: Long) {
+            println("Turn Right!!!")
+            runBlocking {
+                // 左のvirtual stickを右に倒す：時計回りに回転
+                virtualStickVM.setLeftPosition(
+                    (p * Stick.MAX_STICK_POSITION_ABS).toInt(),
+                    0 )
+                delay(duration)
+            }
+            // 回転した後，スティックを中央に戻す
+            virtualStickVM.setLeftPosition(0, 0)
+        }
+
+        // Main Program is below
+        btn_selfDrive_test.setOnClickListener{
+            // start starting
+            println("Start!!")
+//            turnRight(1.0F, 1200) // p=1.0, d=1200 : Rotate about 90°
+            goStraight(0.05F, 1500)
+            runBlocking { delay(1000) }
+            turnRight(1.0F, 1200)
+            runBlocking { delay(1000) }
+            goStraight(0.05F, 1500)
+            runBlocking { delay(1000) }
+            turnRight(1.0F, 1200)
+            runBlocking { delay(1000) }
+            goStraight(0.05F, 1500)
+
+            println("Finish!!")
+        }
+    }
+
+
     private fun initStickListener() {
         left_stick_view.setJoystickListener(object : OnScreenJoystickListener {
             override fun onTouch(joystick: OnScreenJoystick?, pX: Float, pY: Float) {
+                println("pX=$pX")
                 var leftPx = 0F
                 var leftPy = 0F
 

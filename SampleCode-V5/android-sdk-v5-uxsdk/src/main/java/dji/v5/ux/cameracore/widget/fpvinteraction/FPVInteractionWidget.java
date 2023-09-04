@@ -289,7 +289,6 @@ public class FPVInteractionWidget extends FrameLayoutWidget<Object> implements V
     @Override
     public void updateCameraSource(@NonNull ComponentIndexType cameraIndex, @NonNull CameraLensType lensType) {
         widgetModel.updateCameraSource(cameraIndex, lensType);
-        exposureMeterView.updateCameraSource(cameraIndex, lensType);
     }
 
     @NonNull
@@ -327,9 +326,7 @@ public class FPVInteractionWidget extends FrameLayoutWidget<Object> implements V
                         .observeOn(SchedulerProvider.ui())
                         .subscribe(() -> {
                             // do nothing
-                        }, throwable ->
-                                // 仅仅打印日志，不重新设置测光参数
-                                RxUtil.logErrorConsumer(TAG, "onExposureMeterSetFail: ").accept(throwable)));
+                        }, throwable -> onExposureMeterSetFail(newControlMode)));
             }
         } else if (touchFocusEnabled && isInBounds()) {
             focusTargetView.clickEvent(absTargetX, absTargetY);
@@ -346,6 +343,21 @@ public class FPVInteractionWidget extends FrameLayoutWidget<Object> implements V
                 && viewWidth - absTargetX > widthOffset
                 && absTargetY > heightOffset
                 && viewHeight - absTargetY > heightOffset;
+    }
+
+    private void onExposureMeterSetFail(ControlMode controlMode) {
+        if (oldAbsTargetX > 0 && oldAbsTargetY > 0) {
+            addDisposable(widgetModel
+                    .setControlMode(exposureMeterView.clickEvent(controlMode,
+                            oldAbsTargetX,
+                            oldAbsTargetY,
+                            viewWidth,
+                            viewHeight))
+                    .observeOn(SchedulerProvider.ui())
+                    .subscribe(() -> {
+                        //do nothing
+                    }, RxUtil.logErrorConsumer(TAG, "onExposureMeterSetFail: ")));
+        }
     }
 
     private void onFocusTargetSetFail() {
