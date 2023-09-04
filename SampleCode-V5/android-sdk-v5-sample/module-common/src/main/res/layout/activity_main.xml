@@ -101,6 +101,16 @@
                 android:textColor="@color/white"
                 android:textSize="14sp" />
 
+            <TextView
+                android:id="@+id/text_view_TSConnection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="4dp"
+                android:text="@string/ts_connection"
+                android:textColor="@color/white"
+                android:textSize="14sp"/>
+
         </LinearLayout>
 
         <ScrollView
@@ -233,6 +243,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tv_leicaStatus"
+                android:textColor="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="@string/tv_leicaStatus" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/bt_connectTS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bt_connectTS" />
+                <Button
+                    android:id="@+id/bt_readTS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bt_readTS"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_leicaValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:text="@string/tv_leicaValue" />
         </LinearLayout>
 
     </ScrollView>

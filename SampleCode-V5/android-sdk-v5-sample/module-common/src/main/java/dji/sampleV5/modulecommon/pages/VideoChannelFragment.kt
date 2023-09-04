@@ -119,7 +119,6 @@ class VideoChannelFragment : DJIFragment(), View.OnClickListener, SurfaceHolder.
         savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.video_channel_page, container, false)
-        view.setLayerType(View.LAYER_TYPE_NONE , null)
         surfaceView = view.findViewById(R.id.surface_view)
         surfaceView.holder.addCallback(this)
         view.findViewById<Button>(R.id.startChannel).setOnClickListener(this)
@@ -414,7 +413,7 @@ class VideoChannelFragment : DJIFragment(), View.OnClickListener, SurfaceHolder.
      *
      * @param holder The SurfaceHolder whose surface is being created.
      */
-    override fun surfaceCreated(holder: SurfaceHolder) {
+    override fun surfaceCreated(holder: SurfaceHolder?) {
         if (videoDecoder == null) {
             channelVM.videoChannel?.let {
                 videoDecoder = VideoDecoder(
@@ -441,7 +440,7 @@ class VideoChannelFragment : DJIFragment(), View.OnClickListener, SurfaceHolder.
      * @param width The new width of the surface.
      * @param height The new height of the surface.
      */
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         if (videoDecoder == null) {
             channelVM.videoChannel?.let {
                 videoDecoder = VideoDecoder(
@@ -466,7 +465,7 @@ class VideoChannelFragment : DJIFragment(), View.OnClickListener, SurfaceHolder.
      *
      * @param holder The SurfaceHolder whose surface is being destroyed.
      */
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
         videoDecoder?.onPause()
     }
 

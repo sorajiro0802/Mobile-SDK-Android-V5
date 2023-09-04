@@ -32,7 +32,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import dji.v5.ux.R;
 
 /**
@@ -86,8 +85,6 @@ public class WidgetFragment extends Fragment {
             // coupled widgets: set state callback of first widget to second widget
             WidgetView widgetView0 = new WidgetView(getContext());
             WidgetView widgetView1 = new WidgetView(getContext());
-            widgetView0.init(widgetListItem.getWidgetViewHolders()[0]);
-            widgetView1.init(widgetListItem.getWidgetViewHolders()[1]);
             rootView.addView(widgetView0);
             rootView.addView(widgetView1);
         } else {

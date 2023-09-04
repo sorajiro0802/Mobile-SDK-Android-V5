@@ -7,16 +7,14 @@ import androidx.fragment.app.activityViewModels
 import dji.sampleV5.modulecommon.R
 import dji.sampleV5.modulecommon.data.MEDIA_FILE_DETAILS_STR
 import dji.sampleV5.modulecommon.models.VideoPlayVM
-import dji.sdk.keyvalue.key.CameraKey
-import dji.sdk.keyvalue.key.KeyTools
-import dji.sdk.keyvalue.utils.CameraUtil
-import dji.sdk.keyvalue.value.camera.CameraType
 import dji.v5.common.callback.CommonCallbacks
 import dji.v5.common.error.IDJIError
 import dji.v5.common.video.channel.VideoChannelType
-import dji.v5.common.video.decoder.*
-import dji.v5.common.video.interfaces.*
-import dji.v5.manager.KeyManager
+import dji.v5.common.video.decoder.DecoderOutputMode
+import dji.v5.common.video.decoder.DecoderState
+import dji.v5.common.video.decoder.VideoDecoder
+import dji.v5.common.video.interfaces.IVideoDecoder
+import dji.v5.common.video.interfaces.IVideoFrame
 import dji.v5.manager.datacenter.MediaDataCenter
 import dji.v5.manager.datacenter.media.MediaFile
 import dji.v5.manager.datacenter.media.VideoPlayState
@@ -120,7 +118,7 @@ class VideoPlayFragment : DJIFragment(), SurfaceHolder.Callback, View.OnClickLis
         enterPlaybackSuccess = false
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
+    override fun surfaceCreated(holder: SurfaceHolder?) {
         if (videoDecoder == null) {
             videoDecoder = createVideoDecoder()
         } else if (videoDecoder?.decoderStatus == DecoderState.PAUSED) {
@@ -129,7 +127,7 @@ class VideoPlayFragment : DJIFragment(), SurfaceHolder.Callback, View.OnClickLis
         videoDecoder?.mediaFile = mediaFile
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         if (videoDecoder == null) {
             videoDecoder = createVideoDecoder()
 
@@ -138,7 +136,7 @@ class VideoPlayFragment : DJIFragment(), SurfaceHolder.Callback, View.OnClickLis
         }
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
         videoDecoder?.onPause()
     }
 
@@ -158,7 +156,7 @@ class VideoPlayFragment : DJIFragment(), SurfaceHolder.Callback, View.OnClickLis
     }
 
     private fun createVideoDecoder():IVideoDecoder{
-        return  VideoDecoder(
+      return  VideoDecoder(
             this@VideoPlayFragment.context,
             VideoChannelType.EXTENDED_STREAM_CHANNEL,
             DecoderOutputMode.SURFACE_MODE,
@@ -206,6 +204,4 @@ class VideoPlayFragment : DJIFragment(), SurfaceHolder.Callback, View.OnClickLis
             }
         })
     }
-
-
 }

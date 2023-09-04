@@ -24,9 +24,13 @@ class LTEVM : DJIViewModel() {
     val acWlmDongleInfo = MutableLiveData<MutableList<WlmDongleInfo>>()
     val rcWlmDongleInfo = MutableLiveData<MutableList<WlmDongleInfo>>()
 
-    private val lteAuthenticationInfoListener = LTEAuthenticationInfoListener { info -> lteAuthenticationInfo.postValue(info) }
+    private val lteAuthenticationInfoListener = { info: LTEAuthenticationInfo ->
+        lteAuthenticationInfo.postValue(info)
+    }
 
-    private val lteLinkInfoListener = LTELinkInfoListener { info: LTELinkInfo -> lteLinkInfo.postValue(info) }
+    private val lteLinkInfoListener = { info: LTELinkInfo ->
+        lteLinkInfo.postValue(info)
+    }
 
     private val lteDongleInfoListener = object :
         LTEDongleInfoListener {
