@@ -15,7 +15,6 @@ android {
         manifestPlaceholders["API_KEY"] = project.AIRCRAFT_API_KEY
 
         ndk {
-            //noinspection ChromeOsAbiSupport
             abiFilters 'arm64-v8a'
         }
     }
@@ -60,6 +59,7 @@ android {
 
     kotlinOptions{
         jvmTarget = JavaVersion.VERSION_1_8
+        freeCompilerArgs += ["-Xjvm-default=all"]
     }
 
     //关闭lint
