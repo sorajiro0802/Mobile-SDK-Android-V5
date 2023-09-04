@@ -20,9 +20,6 @@ import dji.sampleV5.modulecommon.models.MSDKInfoVm
 import dji.sampleV5.modulecommon.models.MSDKManagerVM
 import dji.sampleV5.modulecommon.models.globalViewModels
 import dji.sampleV5.modulecommon.util.Helper
-import dji.v5.common.error.IDJIError
-import dji.v5.common.register.DJISDKInitEvent
-import dji.v5.manager.interfaces.SDKManagerCallback
 import dji.v5.utils.common.LogUtils
 import dji.v5.utils.common.PermissionUtil
 import dji.v5.utils.common.StringUtils
@@ -41,9 +38,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 abstract class DJIMainActivity : AppCompatActivity() {
 
     val tag: String = LogUtils.getTag(this)
-    private val permissionArray = arrayOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    private val permissionArray = arrayListOf(
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.KILL_BACKGROUND_PROCESSES,
         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -116,7 +111,6 @@ abstract class DJIMainActivity : AppCompatActivity() {
     }
 
     private fun handleAfterPermissionPermitted() {
-        registerApp()
         prepareTestingToolsActivity()
     }
 
@@ -153,6 +147,40 @@ abstract class DJIMainActivity : AppCompatActivity() {
             baseMainActivityVm.doPairing {
                 ToastUtils.showToast(it)
             }
+        }
+    }
+
+    private fun observeSDKManagerStatus() {
+        msdkManagerVM.lvRegisterState.observe(this) { resultPair ->
+            val statusText: String?
+            if (resultPair.first) {
+                ToastUtils.showToast("Register Success")
+                statusText = StringUtils.getResStr(this, R.string.registered)
+                msdkInfoVm.initListener()
+                handler.postDelayed({
+                    prepareUxActivity()
+                }, 5000)
+            } else {
+                ToastUtils.showToast("Register Failure: ${resultPair.second}")
+                statusText = StringUtils.getResStr(this, R.string.unregistered)
+            }
+            text_view_registered.text = StringUtils.getResStr(R.string.registration_status, statusText)
+        }
+
+        msdkManagerVM.lvProductConnectionState.observe(this) { resultPair ->
+            ToastUtils.showToast("Product: ${resultPair.second} ,ConnectionState:  ${resultPair.first}")
+        }
+
+        msdkManagerVM.lvProductChanges.observe(this) { productId ->
+            ToastUtils.showToast("Product: $productId Changed")
+        }
+
+        msdkManagerVM.lvInitProcess.observe(this) { processPair ->
+            ToastUtils.showToast("Init Process event: ${processPair.first.name}")
+        }
+
+        msdkManagerVM.lvDBDownloadProgress.observe(this) { resultPair ->
+            ToastUtils.showToast("Database Download Progress current: ${resultPair.first}, total: ${resultPair.second}")
         }
     }
 
@@ -212,5 +240,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
         super.onDestroy()
         disposable.dispose()
         ToastUtils.destroy()
+    }
+    private fun exceptionToast(res: String) {
+        Toast.makeText(this@DJIMainActivity, res, Toast.LENGTH_SHORT).show()
     }
 }
