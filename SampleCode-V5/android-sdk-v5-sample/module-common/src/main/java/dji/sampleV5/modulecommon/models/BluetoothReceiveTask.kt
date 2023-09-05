@@ -37,37 +37,6 @@ class BluetoothReceiveTask(private val socket: BluetoothSocket?): Thread() {
     }
 
     override fun run(){
-        // previous Setting
-        /*
-        var buffer = ByteArray(1024)
-        var readSize: Int
-
-        Log.i(TAG, "start read task.")
-
-        while (mInputStream != null) {
-            if (mIsCancel) {
-                println("mIsCancel")
-                break
-            }
-            readSize = mInputStream!!.read(buffer)
-            try {
-//                readSize = mInputStream!!.read(buffer)
-                if (readSize == 48) {
-                    //処理
-                    println(readSize)
-                } else {
-                    Log.e(TAG, "NG $readSize byte")
-                }
-                Thread.sleep(2000)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: InterruptedException) {
-                Log.e(TAG, "InterruptedException!!")
-            } finally {
-                Log.e(TAG, "any error occurred")
-            }
-
-        }*/
         // reading socket (https://qiita.com/saccho/items/2741b0f5633cee3ef8ae)
         Log.d(TAG, "Start Receive task")
         reader = BufferedReader(InputStreamReader(mInputStream))
@@ -82,7 +51,7 @@ class BluetoothReceiveTask(private val socket: BluetoothSocket?): Thread() {
                     } else {
                         break
                     }
-                    Thread.sleep(SLEEP_TIME)
+                    sleep(SLEEP_TIME)
                 }
             }
         } catch (e: Exception) {
