@@ -48,7 +48,7 @@ class MSDKInfoVm : DJIViewModel() {
         msdkInfo.value?.packageProductCategory = msdkInfoModel.getPackageProductCategory()
         msdkInfo.value?.isLDMEnabled = LDMManager.getInstance().isLDMEnabled.toString()
         msdkInfo.value?.isLDMLicenseLoaded = LDMManager.getInstance().isLDMLicenseLoaded.toString()
-        msdkInfo.value?.tsConnection = leicaController.isConnected
+        msdkInfo.value?.tsConnection = leicaController.isConnected()
         msdkInfo.value?.coreInfo = msdkInfoModel.getCoreInfo()
 
         areaCodeChangeListener = AreaCodeChangeListener { _, changed ->
