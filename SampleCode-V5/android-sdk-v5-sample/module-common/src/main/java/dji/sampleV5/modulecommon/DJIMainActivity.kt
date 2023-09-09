@@ -86,9 +86,11 @@ abstract class DJIMainActivity : AppCompatActivity() {
                     if(msdkInfoVm.leicaController.connect() == 0){
                         println("successfully connected")
                         this.exceptionToast("Success connecting to TS")
+                        msdkInfoVm.updateTSConnectionStatus()
                     }else {
                         println("failed to connect")
                         this.exceptionToast("Failed connecting to TS")
+                        msdkInfoVm.updateTSConnectionStatus()
                     }
             )}
         TSReadBtn.setOnClickListener(View.OnClickListener{
@@ -123,6 +125,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             text_view_package_product_category.text = StringUtils.getResStr(R.string.package_product_category, it.packageProductCategory)
             text_view_is_debug.text = StringUtils.getResStr(R.string.is_sdk_debug, it.isDebug)
             text_core_info.text = it.coreInfo.toString()
+            text_view_TSConnection.text = StringUtils.getResStr(R.string.ts_connection, it.tsConnection)
         }
         baseMainActivityVm.sdkNews.observe(this) {
             item_news_msdk.setTitle(StringUtils.getResStr(it.title))

@@ -134,4 +134,8 @@ class MSDKInfoVm : DJIViewModel() {
         msdkInfo.value?.isLDMLicenseLoaded = LDMManager.getInstance().isLDMLicenseLoaded.toString()
         refreshMSDKInfo()
     }
+    fun updateTSConnectionStatus() {
+        msdkInfo.value?.tsConnection = leicaController.isConnected()
+        refreshMSDKInfo()
+    }
 }
