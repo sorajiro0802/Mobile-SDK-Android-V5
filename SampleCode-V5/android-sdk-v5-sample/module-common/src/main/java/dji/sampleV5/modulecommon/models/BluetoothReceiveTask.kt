@@ -17,7 +17,7 @@ class BluetoothReceiveTask(private val socket: BluetoothSocket?): Thread() {
     private lateinit var mInputStream: InputStream
     private lateinit var mSocket: BluetoothSocket
     private lateinit var reader: BufferedReader
-    val receiveData: MutableLiveData<String> = MutableLiveData()
+    lateinit var receiveData: MutableLiveData<String>
 
     @Volatile
     private var mIsCancel = false

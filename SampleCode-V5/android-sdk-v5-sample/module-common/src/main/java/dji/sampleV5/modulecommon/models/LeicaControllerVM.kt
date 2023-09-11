@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.util.Log
 import androidx.lifecycle.*
 
-class LeicaControllerVM() : ViewModel() {
+class LeicaControllerVM() : DJIViewModel(){
     private val TAG = "LeicaControllerVM"
     private var connection = false
     private val macAddr: String = "D4:36:39:77:DC:92" // MacAddress of Total Station Leica TS16
@@ -15,6 +15,7 @@ class LeicaControllerVM() : ViewModel() {
     // check below
     private var connectThread: BluetoothConnectThread = SerialPortProfileConnectThread(btDevice)
     var mReceiveTask: BluetoothReceiveTask? = null
+    var prismPos: MutableLiveData<String> = MutableLiveData<String>()
 
     init {
 //        this.connect()
@@ -41,9 +42,10 @@ class LeicaControllerVM() : ViewModel() {
         }
     }
 
-    fun read(){
+    fun read() {
         if(this.connection) {
-            mReceiveTask = BluetoothReceiveTask(this.connectThread!!.getSocket())
+            mReceiveTask = BluetoothReceiveTask(this.connectThread.getSocket())
+            mReceiveTask!!.receiveData = prismPos
             mReceiveTask!!.start()
         } else {
             Log.e(TAG, "Leica is not connected")

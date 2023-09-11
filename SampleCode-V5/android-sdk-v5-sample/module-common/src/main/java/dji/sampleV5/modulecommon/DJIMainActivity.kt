@@ -92,8 +92,13 @@ abstract class DJIMainActivity : AppCompatActivity() {
                     }
             )}
         TSReadBtn.setOnClickListener(View.OnClickListener{
-                msdkInfoVm.leicaController.read()
+            msdkInfoVm.leicaController.read()
         })
+        msdkInfoVm.leicaController.prismPos.observe(this, Observer {
+            tvLeicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
+        })
+
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
