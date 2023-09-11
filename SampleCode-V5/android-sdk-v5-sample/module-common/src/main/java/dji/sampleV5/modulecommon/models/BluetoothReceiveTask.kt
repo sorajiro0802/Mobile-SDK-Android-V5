@@ -42,12 +42,11 @@ class BluetoothReceiveTask(private val socket: BluetoothSocket?): Thread() {
         reader = BufferedReader(InputStreamReader(mInputStream))
         try {
             reader.use{
-                while(true) {
+                while(!mIsCancel) {
                     val message = it.readLine()
                     if(message != null) {
                         receiveData.postValue(message)
                         Log.d(TAG, message)
-
                     } else {
                         break
                     }

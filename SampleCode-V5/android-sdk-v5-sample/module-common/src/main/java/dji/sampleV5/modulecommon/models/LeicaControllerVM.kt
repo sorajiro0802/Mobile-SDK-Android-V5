@@ -25,20 +25,19 @@ class LeicaControllerVM() : DJIViewModel(){
     }
 
     fun connect(): Int {
-        if (this.connectThread == null){
-            println("no device")
-            return -1
-        }
-
-        this.connectThread!!.start()
-        try {
+        return try {
+            this.connectThread.start()
             Thread.sleep(2000)
             this.connection = true
-            return 0
-        }catch (e: InterruptedException) {
+            0
+        } catch (e: InterruptedException) {
             e.printStackTrace()
             this.connection = false
-            return -1
+            -1
+        } catch (e: Exception) {
+            e.printStackTrace()
+            this.connection = false
+            -1
         }
     }
 
@@ -50,6 +49,16 @@ class LeicaControllerVM() : DJIViewModel(){
         } else {
             Log.e(TAG, "Leica is not connected")
         }
+    }
 
+    fun close() {
+        try {
+            mReceiveTask?.cancel()
+            mReceiveTask?.finish()
+        } catch (e: InterruptedException){
+            mReceiveTask?.interrupt()
+            connectThread.interrupt()
+        }
+        this.connection = false
     }
 }
