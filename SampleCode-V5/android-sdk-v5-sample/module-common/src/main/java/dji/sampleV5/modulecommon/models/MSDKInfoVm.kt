@@ -1,12 +1,9 @@
 package dji.sampleV5.modulecommon.models
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dji.sampleV5.modulecommon.data.*
 import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.sdk.keyvalue.key.ProductKey
-import dji.v5.common.error.DJINetworkError
 import dji.v5.et.create
 import dji.v5.et.get
 import dji.v5.et.listen
@@ -18,10 +15,6 @@ import dji.v5.manager.ldm.LDMManager
 import dji.v5.network.DJINetworkManager
 import dji.v5.network.IDJINetworkStatusListener
 import dji.v5.utils.common.LogUtils
-import dji.v5.utils.inner.SDKConfig
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**

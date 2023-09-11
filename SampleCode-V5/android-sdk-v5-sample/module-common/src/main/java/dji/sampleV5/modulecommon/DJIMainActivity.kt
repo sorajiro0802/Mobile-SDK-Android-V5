@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -14,11 +15,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import dji.sampleV5.modulecommon.models.BaseMainActivityVm
-import dji.sampleV5.modulecommon.models.MSDKInfoVm
-import dji.sampleV5.modulecommon.models.MSDKManagerVM
-import dji.sampleV5.modulecommon.models.globalViewModels
+import androidx.lifecycle.Observer
+import dji.sampleV5.modulecommon.models.*
 import dji.sampleV5.modulecommon.util.Helper
 import dji.v5.utils.common.LogUtils
 import dji.v5.utils.common.PermissionUtil

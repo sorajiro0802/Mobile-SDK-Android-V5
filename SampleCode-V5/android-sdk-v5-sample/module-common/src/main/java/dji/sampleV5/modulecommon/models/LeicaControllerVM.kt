@@ -2,17 +2,8 @@ package dji.sampleV5.modulecommon.models
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
-import android.os.Handler
 import android.util.Log
-import android.widget.TextView
-import androidx.annotation.NonNull
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import java.io.OutputStream
-import java.net.Socket
-import java.util.UUID
+import androidx.lifecycle.*
 
 class LeicaControllerVM() : ViewModel() {
     private val TAG = "LeicaControllerVM"
