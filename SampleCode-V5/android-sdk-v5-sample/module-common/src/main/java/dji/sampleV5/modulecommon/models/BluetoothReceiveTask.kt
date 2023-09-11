@@ -12,7 +12,7 @@ import java.io.BufferedReader
 class BluetoothReceiveTask(private val socket: BluetoothSocket?): Thread() {
     companion object{
         const val TAG = "BluetoothReceiveTask"
-        const val SLEEP_TIME = 500L
+        const val SLEEP_TIME = 20L
     }
     private lateinit var mInputStream: InputStream
     private lateinit var mSocket: BluetoothSocket
