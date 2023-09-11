@@ -82,12 +82,12 @@ abstract class DJIMainActivity : AppCompatActivity() {
         val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
         TSConnectBtn.setOnClickListener{v->(
                     if(msdkInfoVm.leicaController.connect() == 0){
-                        println("successfully connected")
-                        this.exceptionToast("Success connecting to TS")
+                        Log.d(tag, "successfully connected")
+                        this.exceptionToast("Success connecting to TS16")
                         msdkInfoVm.updateTSConnectionStatus()
-                    }else {
-                        println("failed to connect")
-                        this.exceptionToast("Failed connecting to TS")
+                    } else {
+                        Log.d(tag, "failed to connect")
+                        this.exceptionToast("Failed connecting to TS16")
                         msdkInfoVm.updateTSConnectionStatus()
                     }
             )}
