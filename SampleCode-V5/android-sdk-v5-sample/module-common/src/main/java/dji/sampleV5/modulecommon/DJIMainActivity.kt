@@ -3,10 +3,7 @@ package dji.sampleV5.modulecommon
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -24,6 +21,7 @@ import dji.v5.utils.common.StringUtils
 import dji.v5.utils.common.ToastUtils
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.*
 
 /**
  * Class Description
@@ -34,7 +32,6 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Copyright (c) 2022, DJI All Rights Reserved.
  */
 abstract class DJIMainActivity : AppCompatActivity() {
-
     val tag: String = LogUtils.getTag(this)
     private val permissionArray = arrayListOf(
         Manifest.permission.RECORD_AUDIO,
@@ -60,6 +57,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
     private val msdkManagerVM: MSDKManagerVM by globalViewModels()
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val disposable = CompositeDisposable()
+    private val posData = mutableListOf<String>()
 
     abstract fun prepareUxActivity()
 
@@ -96,6 +94,31 @@ abstract class DJIMainActivity : AppCompatActivity() {
         })
         msdkInfoVm.leicaController.prismPos.observe(this, Observer {
             tvLeicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
+            posData.add(it)
+
+            // TS16で取得したデータを保存する
+            val saveBatchSize = 10
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/TS16Data"
+            val filename = "tmp_data_ts16.txt"
+            val filepath = File("$saveDir/$filename")
+            if(posData.size >= saveBatchSize){
+                try{
+                    val outstream: FileOutputStream = FileOutputStream(filepath, true)
+                    val writer: OutputStreamWriter = OutputStreamWriter(outstream)
+                    for (data in posData) {
+                        writer.write(data)
+                        writer.write("\r")
+                    }
+                    writer.flush()
+                    writer.close()
+                    posData.clear()
+                } catch (e: FileNotFoundException) {
+                    e.printStackTrace()
+                } catch( e:IOException){
+                    e.printStackTrace()
+                }
+            }
         })
 
 
@@ -129,6 +152,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             text_view_is_debug.text = StringUtils.getResStr(R.string.is_sdk_debug, it.isDebug)
             text_core_info.text = it.coreInfo.toString()
             text_view_TSConnection.text = StringUtils.getResStr(R.string.ts_connection, it.tsConnection)
+//            tv_leicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it.tsValue)
         }
         baseMainActivityVm.sdkNews.observe(this) {
             item_news_msdk.setTitle(StringUtils.getResStr(it.title))
