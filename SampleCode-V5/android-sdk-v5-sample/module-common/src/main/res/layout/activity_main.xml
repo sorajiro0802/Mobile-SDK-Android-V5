@@ -244,6 +244,61 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"/>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                >
+
+                <EditText
+                    android:id="@+id/edit_text_ipAddr"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/et_ipHint"
+                    android:inputType="phone"
+                    android:minHeight="48dp"
+                    android:text="@string/et_ipAddr"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/synctimeButton"
+                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="10sp"
+                    android:layout_height="wrap_content"
+                    android:text="synctime" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="5dp">
+
+                    <TextView
+                        android:id="@+id/text_view_timeDiffAveStd"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:text="@string/tv_timeDiffAveStd"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/text_view_timeDiffMaxMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:text="@string/tv_timeDiffMaxMin"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+                </LinearLayout>
+                <Button
+                    android:id="@+id/syncTime_stopButton"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="stop"/>
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/tv_leicaStatus"
                 android:textColor="@color/white"
@@ -256,16 +311,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
+
                 <Button
                     android:id="@+id/bt_connectTS"
-                    android:layout_width="wrap_content"
+                    android:layout_width="88dp"
                     android:layout_height="wrap_content"
                     android:text="@string/bt_connectTS" />
+
                 <Button
                     android:id="@+id/bt_readTS"
-                    android:layout_width="wrap_content"
+                    android:layout_width="88dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/bt_readTS"/>
+                    android:text="@string/bt_readTS" />
+
+                <Button
+                    android:id="@+id/bt_stopTS"
+                    android:layout_width="88dp"
+                    android:layout_height="wrap_content"
+                    android:text="Stop reading" />
+
             </LinearLayout>
 
             <TextView

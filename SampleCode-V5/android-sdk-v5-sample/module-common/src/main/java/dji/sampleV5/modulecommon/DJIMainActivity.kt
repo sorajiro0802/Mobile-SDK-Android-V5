@@ -7,6 +7,7 @@ import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,6 +59,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val disposable = CompositeDisposable()
     private val posData = mutableListOf<String>()
+    private lateinit var timesync: TimeSyncVM
 
     abstract fun prepareUxActivity()
 
@@ -74,6 +76,21 @@ abstract class DJIMainActivity : AppCompatActivity() {
         initMSDKInfoView()
         observeSDKManagerStatus()
         checkPermissionAndRequest()
+
+//        val ipAddrEditText: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
+        val timeSyncBtn: Button = findViewById<Button>(R.id.synctimeButton)
+        val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton)
+        val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
+//        timesync.setAddress(timeSyncAddr.text.toString(), 8020)
+
+        timeSyncBtn.setOnClickListener(View.OnClickListener {
+            timesync = TimeSyncVM("192.168.0.98", 8020)
+            timesync.sync()
+        })
+        timeSyncStopBtn.setOnClickListener { v->(timesync.stop()) }
+
+
+
 
         val TSConnectBtn: Button = findViewById<Button>(R.id.bt_connectTS)
         val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
