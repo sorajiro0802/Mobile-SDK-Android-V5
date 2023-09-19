@@ -11,17 +11,18 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class TimeSyncVM(var ip_addr:String, var port: Int) : DJIViewModel() {
+class TimeSyncVM() : DJIViewModel() {
+    var ip_addr : String = "192.168.0.98"
+    var port: Int = 8020
     val serverTime: MutableLiveData<String> = MutableLiveData()
-    val sc: SocketClient = SocketClient(ip_addr, port)
+    var sc: SocketClient = SocketClient(ip_addr, port)
 
     fun sync(){
         sc.start()
-//        sc.read()
     }
 
     // サーバに接続するクラス
-    inner class SocketClient(private val ip:String, private val port:Int): Thread(){
+    inner class SocketClient(var ip:String, var port:Int): Thread(){
         private lateinit var socket: Socket
         private lateinit var reader: BufferedReader
 //        private lateinit var reader: InputStream
@@ -38,11 +39,14 @@ class TimeSyncVM(var ip_addr:String, var port: Int) : DJIViewModel() {
                 Log.d(TAG, "connected socket")
             } catch (e: Exception) {
                 Log.e(TAG, "$e")
+//                socket = null
             }
         }
 
         fun read(){
-            if(!socket.isConnected){
+            try {
+                !socket.isConnected
+            } catch (e:Exception) {
                 Log.e(TAG, "No Connection")
                 return
             }
@@ -108,10 +112,12 @@ class TimeSyncVM(var ip_addr:String, var port: Int) : DJIViewModel() {
         return df.format(date)
     }
 
-    fun setAddress(ip:String, port: Int){
-        Log.d(TAG, "settled new addr ($ip_addr,$port)")
+    fun setAddress(ip: String, port: Int){
+        Log.d(TAG, "settled new addr ($ip,$port)")
         this.ip_addr = ip
         this.port = port
+        sc.ip = this.ip_addr
+        sc.port = this.port
     }
 
     fun stop(){
