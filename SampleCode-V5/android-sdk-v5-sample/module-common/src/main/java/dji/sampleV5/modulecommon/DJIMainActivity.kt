@@ -84,7 +84,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
 //        timesync.setAddress(timeSyncAddr.text.toString(), 8020)
 
         timeSyncBtn.setOnClickListener(View.OnClickListener {
-            timesync = TimeSyncVM("192.168.0.98", 8020)
+            timesync = TimeSyncVM()
+            timesync.setAddress(timeSyncAddr.text.toString(), 8020)
             timesync.sync()
         })
         timeSyncStopBtn.setOnClickListener { v->(timesync.stop()) }

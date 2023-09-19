@@ -50,6 +50,7 @@ class LeicaControllerVM() : DJIViewModel(){
             Log.e(TAG, "Leica is not connected")
         }
     }
+    fun stop(){}
 
     fun close() {
         try {

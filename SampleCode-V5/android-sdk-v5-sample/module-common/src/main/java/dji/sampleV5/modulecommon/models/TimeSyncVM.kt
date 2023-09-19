@@ -25,7 +25,6 @@ class TimeSyncVM() : DJIViewModel() {
     inner class SocketClient(var ip:String, var port:Int): Thread(){
         private lateinit var socket: Socket
         private lateinit var reader: BufferedReader
-//        private lateinit var reader: InputStream
         private val receivedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
 
         override fun run(){
@@ -39,7 +38,6 @@ class TimeSyncVM() : DJIViewModel() {
                 Log.d(TAG, "connected socket")
             } catch (e: Exception) {
                 Log.e(TAG, "$e")
-//                socket = null
             }
         }
 
@@ -69,30 +67,6 @@ class TimeSyncVM() : DJIViewModel() {
                 Log.e(TAG, "$e")
             }
         }
-//        private fun read(): Boolean{
-//            var temp = ""
-//            val w = ByteArray(1024)
-//            var size: Int
-//
-//            if (!socket.isConnected) {
-//                return false
-//            }
-//            try {
-//                val reader = socket.getInputStream()
-//                size = reader.read(w)
-//                if (size <= 0) {
-//                    print(size)
-//                    return false
-//                } else {
-//                    temp = String(w, 0, size, charset("UTF-8"))
-//                    print(temp)
-//                }
-//                return true
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                return false
-//            }
-//        }
 
         fun close() {
             if (::reader.isInitialized) {
