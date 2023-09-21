@@ -26,7 +26,7 @@ class TimeSyncVM() : DJIViewModel() {
         var stop_flag = false
         var socket = DatagramSocket(port)
 
-        private val receivedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
+        val recievedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
 
         override fun run(){
             this.read()
@@ -47,7 +47,9 @@ class TimeSyncVM() : DJIViewModel() {
 
             try {
                 socket.receive(packet)
-                Log.d(TAG, String(buffer))
+                val data = String(buffer)
+//                Log.d(TAG, data)
+                recievedData.postValue(data)
             } catch (e: Exception) {
                 Log.e(TAG, "Could not receive data")
             }
