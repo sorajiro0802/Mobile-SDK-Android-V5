@@ -24,7 +24,7 @@ class TimeSyncVM() : DJIViewModel() {
     inner class SocketClient(var ip: String, var port:Int): Thread(){
         var inetIP: InetAddress = InetAddress.getByName(ip)
         var stop_flag = false
-        var socket = DatagramSocket(port)
+        private var socket = DatagramSocket(port)
 
         private val receivedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
 
@@ -32,7 +32,7 @@ class TimeSyncVM() : DJIViewModel() {
             this.read()
         }
 
-        fun read(){
+        private fun read(){
             while(!stop_flag){
                 send("send")
                 sleep(SLEEP_TIME)
@@ -40,8 +40,7 @@ class TimeSyncVM() : DJIViewModel() {
             }
         }
 
-        fun recieve(){
-//            val socket = DatagramSocket(port)
+        private fun recieve(){
             val buffer: ByteArray = ByteArray(24)
             val packet: DatagramPacket = DatagramPacket(buffer, buffer.size)
 
@@ -49,7 +48,7 @@ class TimeSyncVM() : DJIViewModel() {
                 socket.receive(packet)
                 val data = String(buffer)
 //                Log.d(TAG, data)
-                recievedData.postValue(data)
+                receivedData.postValue(data)
             } catch (e: Exception) {
                 Log.e(TAG, "Could not receive data")
             }
@@ -67,7 +66,11 @@ class TimeSyncVM() : DJIViewModel() {
         }
 
         fun close(){
-            socket.close()
+            try {
+                socket.close()
+            } catch(e: Exception) {
+                Log.e(TAG, "Could not close UDP Socket")
+            }
         }
 
     }
