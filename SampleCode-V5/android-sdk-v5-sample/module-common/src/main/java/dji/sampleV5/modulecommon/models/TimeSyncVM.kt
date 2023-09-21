@@ -26,7 +26,7 @@ class TimeSyncVM() : DJIViewModel() {
         var stop_flag = false
         var socket = DatagramSocket(port)
 
-        val recievedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
+        private val receivedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
 
         override fun run(){
             this.read()
