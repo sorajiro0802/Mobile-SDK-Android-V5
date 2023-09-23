@@ -77,6 +77,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
         observeSDKManagerStatus()
         checkPermissionAndRequest()
 
+
+        //////////////////////////////////  Time Synchronization  //////////////////////////////////
         val timeSyncBtn: Button = findViewById<Button>(R.id.synctimeButton)
         val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton); timeSyncStopBtn.isEnabled = false
         val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
@@ -110,7 +112,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
         })
 
 
-
+        //////////////////////////////////  Total Station  //////////////////////////////////
         val TSConnectBtn: Button = findViewById<Button>(R.id.bt_connectTS)
         val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
         val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
