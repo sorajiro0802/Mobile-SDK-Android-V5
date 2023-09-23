@@ -1,5 +1,6 @@
 package dji.sampleV5.modulecommon
 
+import SaveList
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -135,27 +136,18 @@ abstract class DJIMainActivity : AppCompatActivity() {
             posData.add(it)
 
             // TS16で取得したデータを保存する
-            val saveBatchSize = 10
+            val saveBatchSize = 100
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/TS16Data"
-            val filename = "tmp_data_ts16.txt"
-            val filepath = File("$saveDir/$filename")
+            val filename = "tmp_data_ts16_1.txt"
+            val filepath = "$saveDir/$filename"
+            val saver = SaveList()
+            saver.set(filepath)
+
             if(posData.size >= saveBatchSize){
-                try{
-                    val outstream: FileOutputStream = FileOutputStream(filepath, true)
-                    val writer: OutputStreamWriter = OutputStreamWriter(outstream)
-                    for (data in posData) {
-                        writer.write(data)
-                        writer.write("\r")
-                    }
-                    writer.flush()
-                    writer.close()
-                    posData.clear()
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                } catch( e:IOException){
-                    e.printStackTrace()
-                }
+                var time = saver.save(posData)
+                Log.d("FileSaveTime", "$time ms")
+                posData.clear()
             }
         })
 
