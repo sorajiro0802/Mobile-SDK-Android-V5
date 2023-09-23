@@ -78,15 +78,23 @@ abstract class DJIMainActivity : AppCompatActivity() {
         checkPermissionAndRequest()
 
         val timeSyncBtn: Button = findViewById<Button>(R.id.synctimeButton)
-        val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton)
+        val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton); timeSyncStopBtn.isEnabled = false
         val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
         val timeDiff: TextView = findViewById<TextView>(R.id.text_view_timeDiff)
 
         timeSyncBtn.setOnClickListener(View.OnClickListener {
+            // Button Toggle
+            it.isEnabled = false
+            timeSyncStopBtn.isEnabled = true
+            // Start synchronization
             timesync.setAddress(timeSyncAddr.text.toString(), 8020)
             timesync.sync()
         })
         timeSyncStopBtn.setOnClickListener(View.OnClickListener {
+            // Button Toggle
+            it.isEnabled = false
+            timeSyncBtn.isEnabled = true
+            // Stop synchro
             timesync.stop()
         })
 
