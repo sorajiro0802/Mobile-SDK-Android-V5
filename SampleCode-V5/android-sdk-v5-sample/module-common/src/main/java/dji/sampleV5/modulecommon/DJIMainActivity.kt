@@ -59,7 +59,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val disposable = CompositeDisposable()
     private val posData = mutableListOf<String>()
-    private lateinit var timesync: TimeSyncVM
+    private var timesync: TimeSyncVM = TimeSyncVM()
 
     abstract fun prepareUxActivity()
 
@@ -77,19 +77,29 @@ abstract class DJIMainActivity : AppCompatActivity() {
         observeSDKManagerStatus()
         checkPermissionAndRequest()
 
-//        val ipAddrEditText: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
         val timeSyncBtn: Button = findViewById<Button>(R.id.synctimeButton)
         val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton)
         val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
-//        timesync.setAddress(timeSyncAddr.text.toString(), 8020)
+        val timeDiff: TextView = findViewById<TextView>(R.id.text_view_timeDiff)
 
         timeSyncBtn.setOnClickListener(View.OnClickListener {
-            timesync = TimeSyncVM()
             timesync.setAddress(timeSyncAddr.text.toString(), 8020)
             timesync.sync()
         })
-        timeSyncStopBtn.setOnClickListener { v->(timesync.stop()) }
+        timeSyncStopBtn.setOnClickListener(View.OnClickListener {
+            timesync.stop()
+        })
 
+        // 時間同期サーバから受信した時間データ
+        timesync.serverTime.observe(this, Observer{
+            Log.d(tag, "Data:$it")
+            val server_date = it
+            val client_data = timesync.getNowDate()
+            val timediff = timesync.calcTimeDiff(server_date, client_data)
+//            timeDiffData.add(timediff)
+
+            timeDiff.text = "time diff: $timediff ms"
+        })
 
 
 

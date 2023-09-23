@@ -13,10 +13,11 @@ import kotlin.math.floor
 class TimeSyncVM() : DJIViewModel() {
     var ip : String = ""
     var port: Int = 8020
-    val serverTime: MutableLiveData<String> = MutableLiveData()
+    val serverTime: MutableLiveData<String> = MutableLiveData<String>()
     var sc: SocketClient = SocketClient(ip, port)
 
     fun sync(){
+        sc = SocketClient(ip, port)
         sc.start()
     }
 
@@ -24,16 +25,15 @@ class TimeSyncVM() : DJIViewModel() {
     inner class SocketClient(var ip: String, var port:Int): Thread(){
         var inetIP: InetAddress = InetAddress.getByName(ip)
         var stop_flag = false
-        private var socket = DatagramSocket(port)
-
-        private val receivedData: MutableLiveData<String> = this@TimeSyncVM.serverTime
+        private lateinit var socket: DatagramSocket
 
         override fun run(){
             this.read()
         }
 
         private fun read(){
-            while(!stop_flag){
+            socket = DatagramSocket(port)
+            while (!stop_flag) {
                 send("send")
                 sleep(SLEEP_TIME)
                 recieve()
@@ -48,14 +48,13 @@ class TimeSyncVM() : DJIViewModel() {
                 socket.receive(packet)
                 val data = String(buffer)
 //                Log.d(TAG, data)
-                receivedData.postValue(data)
+                this@TimeSyncVM.serverTime.postValue(data)
             } catch (e: Exception) {
                 Log.e(TAG, "Could not receive data")
             }
         }
 
         fun send(msg: String){
-//            val socket = DatagramSocket(port)
             val byte = msg.toByteArray()
             try {
                 val packet = DatagramPacket(byte, byte.size, inetIP, port)
