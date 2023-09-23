@@ -5,10 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
-import java.net.InetSocketAddress
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.floor
 
 class TimeSyncVM() : DJIViewModel() {
     var ip : String = ""
@@ -79,6 +79,15 @@ class TimeSyncVM() : DJIViewModel() {
         val df: DateFormat = SimpleDateFormat("yyyy/MM/dd,HH:mm:ss.SSS")
         val date: Date = Date(System.currentTimeMillis())
         return df.format(date)
+    }
+
+    fun calcTimeDiff(date1: String, date2: String):Float{
+        // 分以下の誤差を計算する仕様(時間までは合っているだろう)
+        val underMin1 = date1.drop(14).split(":"); val underMin2 = date2.drop(14).split(":")
+        val sec1 = underMin1[0].toInt() * 60 + underMin1[1].toDouble()
+        val sec2 = underMin2[0].toInt() * 60 + underMin2[1].toDouble()
+        val diff = (sec2 - sec1)*1000
+        return (floor(diff)/1000).toFloat()
     }
 
     fun setAddress(ip: String, port: Int){
