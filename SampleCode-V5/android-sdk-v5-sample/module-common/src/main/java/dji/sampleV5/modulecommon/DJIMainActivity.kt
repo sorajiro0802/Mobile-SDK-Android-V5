@@ -61,7 +61,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
     private val posData = mutableListOf<String>()
     private var timesync: TimeSyncVM = TimeSyncVM()
-
+    private val timesyncData = mutableListOf<String>()
     abstract fun prepareUxActivity()
 
     abstract fun prepareTestingToolsActivity()
@@ -92,23 +92,40 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // Start synchronization
             timesync.setAddress(timeSyncAddr.text.toString(), 8020)
             timesync.sync()
+            // add CSV header
+            timesyncData.add("ServerTime,ClientTime")
         })
+
         timeSyncStopBtn.setOnClickListener(View.OnClickListener {
             // Button Toggle
             it.isEnabled = false
             timeSyncBtn.isEnabled = true
             // Stop synchro
             timesync.stop()
+
+            // save timesync log
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/Timesynchronisation Logs"
+            val filename = "tmp_data_202309301441.csv"
+            val filepath = "$saveDir/$filename"
+            val saver = SaveList()
+            saver.set(filepath)
+
+            // save list data to text file
+            val time = saver.save(timesyncData)
+            Log.d("FileSaveTime TS Data", "$time ms")
+            timesyncData.clear()
         })
 
         // 時間同期サーバから受信した時間データ
         timesync.serverTime.observe(this, Observer{
             Log.d(tag, "Data:$it")
-            val server_date = it
+            // 改行コードを抜く
+            val server_date = it.replace("\n", "")
             val client_data = timesync.getNowDate()
-            val timediff = timesync.calcTimeDiff(server_date, client_data)
-//            timeDiffData.add(timediff)
+            timesyncData.add("$server_date,$client_data")
 
+            val timediff = timesync.calcTimeDiff(server_date, client_data)
             timeDiff.text = "time diff: $timediff ms"
         })
 
@@ -151,7 +168,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
 
             if(posData.size >= saveBatchSize){
                 var time = saver.save(posData)
-                Log.d("FileSaveTime", "$time ms")
+                Log.d("FileSaveTime TS Data", "$time ms")
                 posData.clear()
             }
         })
