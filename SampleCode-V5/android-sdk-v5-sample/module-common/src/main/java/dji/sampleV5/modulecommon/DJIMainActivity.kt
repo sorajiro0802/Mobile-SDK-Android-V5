@@ -116,7 +116,11 @@ abstract class DJIMainActivity : AppCompatActivity() {
         //////////////////////////////////  Total Station  //////////////////////////////////
         val TSConnectBtn: Button = findViewById<Button>(R.id.bt_connectTS)
         val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
+        val TSStopBtn: Button = findViewById<Button>(R.id.bt_stopTS)
+        val TSDisconnectBtn: Button = findViewById<Button>(R.id.bt_disconnectTS)
+
         val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
+        // Connection for TS16
         TSConnectBtn.setOnClickListener{v->(
                     if(msdkInfoVm.leicaController.connect() == 0){
                         Log.d(tag, "successfully connected")
@@ -128,6 +132,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
                         msdkInfoVm.updateTSConnectionStatus()
                     }
             )}
+        // Reading
         TSReadBtn.setOnClickListener(View.OnClickListener{
             msdkInfoVm.leicaController.read()
         })
@@ -150,6 +155,16 @@ abstract class DJIMainActivity : AppCompatActivity() {
                 posData.clear()
             }
         })
+
+        // Stop Reading
+        TSStopBtn.setOnClickListener {
+            msdkInfoVm.leicaController.stop()
+        }
+        // Disconnect TS16
+        TSDisconnectBtn.setOnClickListener {
+            msdkInfoVm.leicaController.close()
+            Thread.sleep(500)
+        }
 
 
     }

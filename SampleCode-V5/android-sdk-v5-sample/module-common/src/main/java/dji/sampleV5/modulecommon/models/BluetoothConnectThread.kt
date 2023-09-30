@@ -20,6 +20,10 @@ open class BluetoothConnectThread(device: BluetoothDevice, uuid: UUID): Thread()
         try {
             tmp = device.createRfcommSocketToServiceRecord(uuid)
         } catch (e: IOException) {
+            Log.e(TAG, "$e")
+            e.printStackTrace()
+        } catch (e: SecurityException) {
+            Log.e(TAG, "$e")
             e.printStackTrace()
         }
         btSocket = tmp
@@ -40,6 +44,9 @@ open class BluetoothConnectThread(device: BluetoothDevice, uuid: UUID): Thread()
                 e1.printStackTrace()
             }
             return
+        } catch (e: SecurityException){
+            Log.e(TAG, "$e")
+            e.printStackTrace()
         }
         Log.i(TAG, "Bluetooth connecting.")
     }

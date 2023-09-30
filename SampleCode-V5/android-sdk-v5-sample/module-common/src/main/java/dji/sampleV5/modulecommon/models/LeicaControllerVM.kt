@@ -26,9 +26,11 @@ class LeicaControllerVM() : DJIViewModel(){
 
     fun connect(): Int {
         return try {
+            connectThread = SerialPortProfileConnectThread(btDevice)
             this.connectThread.start()
             Thread.sleep(2000)
             this.connection = true
+            mReceiveTask = BluetoothReceiveTask(connectThread.getSocket())
             0
         } catch (e: InterruptedException) {
             e.printStackTrace()
@@ -36,28 +38,36 @@ class LeicaControllerVM() : DJIViewModel(){
             -1
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.d(TAG, "$e")
             this.connection = false
             -1
         }
+
     }
 
     fun read() {
         if(this.connection) {
-            mReceiveTask = BluetoothReceiveTask(this.connectThread.getSocket())
             mReceiveTask!!.receiveData = prismPos
             mReceiveTask!!.start()
         } else {
             Log.e(TAG, "Leica is not connected")
         }
     }
-    fun stop(){}
+    fun stop(){
+
+        try {
+            prismPos.postValue("")
+        } catch (e: InterruptedException){
+            e.printStackTrace()
+        }
+    }
 
     fun close() {
         try {
-            mReceiveTask?.cancel()
-            mReceiveTask?.finish()
+            mReceiveTask!!.cancel()
+            mReceiveTask!!.finish()
         } catch (e: InterruptedException){
-            mReceiveTask?.interrupt()
+            mReceiveTask!!.interrupt()
             connectThread.interrupt()
         }
         this.connection = false
