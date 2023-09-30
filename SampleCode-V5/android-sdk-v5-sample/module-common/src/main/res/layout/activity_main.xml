@@ -315,6 +315,12 @@
                     android:layout_height="wrap_content"
                     android:text="Stop reading" />
 
+                <Button
+                    android:id="@+id/bt_disconnectTS"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:text="Disconnect TS" />
+
             </LinearLayout>
 
             <TextView
