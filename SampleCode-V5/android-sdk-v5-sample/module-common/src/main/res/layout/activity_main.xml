@@ -100,16 +100,17 @@
                 android:text="@string/is_sdk_debug"
                 android:textColor="@color/white"
                 android:textSize="14sp" />
-
             <TextView
                 android:id="@+id/text_view_TSConnection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="4dp"
+                android:gravity="center"
                 android:text="@string/ts_connection"
                 android:textColor="@color/white"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+                />
 
         </LinearLayout>
 
@@ -216,6 +217,7 @@
         app:layout_constraintTop_toTopOf="@+id/msg_panel" />
 
     <dji.sampleV5.modulecommon.views.VersionInfoView
+        android:id="@+id/versionInfoView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -227,111 +229,98 @@
         app:layout_constraintTop_toBottomOf="@+id/text_view_news_title"
         app:layout_constraintVertical_bias="0" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="135dp"
+        android:layout_marginLeft="255dp"
+        app:layout_constraintStart_toStartOf="@+id/msg_panel"
+        app:layout_constraintTop_toBottomOf="@+id/versionInfoView">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/edit_text_ipAddr"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/et_ipHint"
+                android:inputType="phone"
+                android:minHeight="48dp"
+                android:text="@string/et_ipAddr"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+            <Button
+                android:id="@+id/synctimeButton"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="10sp"
+                android:layout_height="wrap_content"
+                android:text="synctime" />
+
+            <TextView
+                android:id="@+id/text_view_timeDiff"
+                android:layout_width="130sp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="@string/tv_timeDiff"
+                android:textColor="@color/white"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/syncTime_stopButton"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="stop"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_leicaStatus"
+            android:textColor="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:text="@string/tv_leicaStatus" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <dji.sampleV5.modulecommon.views.ItemNewsLayout
-                android:id="@+id/item_news_uxsdk"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/bt_connectTS"
+                android:layout_width="90dp"
                 android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:text="@string/bt_connectTS" />
 
-            <dji.sampleV5.modulecommon.views.ItemNewsLayout
-                android:id="@+id/item_news_msdk"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/bt_readTS"
+                android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"/>
+                android:text="@string/bt_readTS" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                >
-
-                <EditText
-                    android:id="@+id/edit_text_ipAddr"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/et_ipHint"
-                    android:inputType="phone"
-                    android:minHeight="48dp"
-                    android:text="@string/et_ipAddr"
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
-
-                <Button
-                    android:id="@+id/synctimeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_marginLeft="10sp"
-                    android:layout_height="wrap_content"
-                    android:text="synctime" />
-
-                <TextView
-                    android:id="@+id/text_view_timeDiff"
-                    android:layout_width="130sp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:text="@string/tv_timeDiff"
-                    android:textColor="@color/white"
-                    android:textSize="15sp" />
-
-                <Button
-                    android:id="@+id/syncTime_stopButton"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="stop"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_leicaStatus"
-                android:textColor="@color/white"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/bt_stopTS"
+                android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:text="@string/tv_leicaStatus" />
+                android:text="Stop reading" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/bt_connectTS"
-                    android:layout_width="90dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/bt_connectTS" />
-
-                <Button
-                    android:id="@+id/bt_readTS"
-                    android:layout_width="88dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/bt_readTS" />
-
-                <Button
-                    android:id="@+id/bt_stopTS"
-                    android:layout_width="88dp"
-                    android:layout_height="wrap_content"
-                    android:text="Stop reading" />
-
-                <Button
-                    android:id="@+id/bt_disconnectTS"
-                    android:layout_width="110dp"
-                    android:layout_height="wrap_content"
-                    android:text="Disconnect TS" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_leicaValue"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/bt_disconnectTS"
+                android:layout_width="110dp"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:text="@string/tv_leicaValue" />
+                android:text="Disconnect TS" />
+
         </LinearLayout>
 
-    </ScrollView>
+        <TextView
+            android:id="@+id/tv_leicaValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="@string/tv_leicaValue" />
+
+
+    </LinearLayout>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
