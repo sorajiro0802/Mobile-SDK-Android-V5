@@ -16,9 +16,7 @@ More refer to the release notes." </string>
     <string name="tv_leicaValue" translatable="false">Read Info\n %1$s</string>
     <string name="et_ipHint" translatable="false">server IP Addr</string>
     <string name="et_ipAddr" translatable="false">192.168.</string>
-    <string name="tv_timeDiffAveStd" translatable="false">Ave,Std: %1$s ms</string>
-    <string name="tv_timeDiffMaxMin" translatable="false">Max,min: %1$s ms</string>
-
+    <string name="tv_timeDiff" translatable="false">time diff: ms</string>
 
     <string name="app_name_all">MSDK ALL</string>
     <string name="app_name_aircraft">MSDK Aircraft</string>

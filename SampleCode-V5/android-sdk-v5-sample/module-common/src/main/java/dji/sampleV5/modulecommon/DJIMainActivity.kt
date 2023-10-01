@@ -1,5 +1,6 @@
 package dji.sampleV5.modulecommon
 
+import SaveList
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -59,8 +60,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val disposable = CompositeDisposable()
     private val posData = mutableListOf<String>()
-    private lateinit var timesync: TimeSyncVM
-
+    private var timesync: TimeSyncVM = TimeSyncVM()
+    private val timesyncData = mutableListOf<String>()
     abstract fun prepareUxActivity()
 
     abstract fun prepareTestingToolsActivity()
@@ -77,25 +78,66 @@ abstract class DJIMainActivity : AppCompatActivity() {
         observeSDKManagerStatus()
         checkPermissionAndRequest()
 
-//        val ipAddrEditText: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
+
+        //////////////////////////////////  Time Synchronization  //////////////////////////////////
         val timeSyncBtn: Button = findViewById<Button>(R.id.synctimeButton)
-        val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton)
+        val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton); timeSyncStopBtn.isEnabled = false
         val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
-//        timesync.setAddress(timeSyncAddr.text.toString(), 8020)
+        val timeDiff: TextView = findViewById<TextView>(R.id.text_view_timeDiff)
 
         timeSyncBtn.setOnClickListener(View.OnClickListener {
-            timesync = TimeSyncVM()
+            // Button Toggle
+            it.isEnabled = false
+            timeSyncStopBtn.isEnabled = true
+            // Start synchronization
             timesync.setAddress(timeSyncAddr.text.toString(), 8020)
             timesync.sync()
+            // add CSV header
+            timesyncData.add("ServerTime,ClientTime")
         })
-        timeSyncStopBtn.setOnClickListener { v->(timesync.stop()) }
+
+        timeSyncStopBtn.setOnClickListener(View.OnClickListener {
+            // Button Toggle
+            it.isEnabled = false
+            timeSyncBtn.isEnabled = true
+            // Stop synchro
+            timesync.stop()
+
+            // save timesync log
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/Timesynchronisation Logs"
+            val filename = "tmp_data_202309301441.csv"
+            val filepath = "$saveDir/$filename"
+            val saver = SaveList()
+            saver.set(filepath)
+
+            // save list data to text file
+            val time = saver.save(timesyncData)
+            Log.d("FileSaveTime TS Data", "$time ms")
+            timesyncData.clear()
+        })
+
+        // 時間同期サーバから受信した時間データ
+        timesync.serverTime.observe(this, Observer{
+            Log.d(tag, "Data:$it")
+            // 改行コードを抜く
+            val server_date = it.replace("\n", "")
+            val client_data = timesync.getNowDate()
+            timesyncData.add("$server_date,$client_data")
+
+            val timediff = timesync.calcTimeDiff(server_date, client_data)
+            timeDiff.text = "time diff: $timediff ms"
+        })
 
 
-
-
+        //////////////////////////////////  Total Station  //////////////////////////////////
         val TSConnectBtn: Button = findViewById<Button>(R.id.bt_connectTS)
         val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
+        val TSStopBtn: Button = findViewById<Button>(R.id.bt_stopTS)
+        val TSDisconnectBtn: Button = findViewById<Button>(R.id.bt_disconnectTS)
+
         val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
+        // Connection for TS16
         TSConnectBtn.setOnClickListener{v->(
                     if(msdkInfoVm.leicaController.connect() == 0){
                         Log.d(tag, "successfully connected")
@@ -107,6 +149,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
                         msdkInfoVm.updateTSConnectionStatus()
                     }
             )}
+        // Reading
         TSReadBtn.setOnClickListener(View.OnClickListener{
             msdkInfoVm.leicaController.read()
         })
@@ -115,29 +158,30 @@ abstract class DJIMainActivity : AppCompatActivity() {
             posData.add(it)
 
             // TS16で取得したデータを保存する
-            val saveBatchSize = 10
+            val saveBatchSize = 100
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/TS16Data"
-            val filename = "tmp_data_ts16.txt"
-            val filepath = File("$saveDir/$filename")
+            val filename = "tmp_data_ts16_1.txt"
+            val filepath = "$saveDir/$filename"
+            val saver = SaveList()
+            saver.set(filepath)
+
             if(posData.size >= saveBatchSize){
-                try{
-                    val outstream: FileOutputStream = FileOutputStream(filepath, true)
-                    val writer: OutputStreamWriter = OutputStreamWriter(outstream)
-                    for (data in posData) {
-                        writer.write(data)
-                        writer.write("\r")
-                    }
-                    writer.flush()
-                    writer.close()
-                    posData.clear()
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                } catch( e:IOException){
-                    e.printStackTrace()
-                }
+                var time = saver.save(posData)
+                Log.d("FileSaveTime TS Data", "$time ms")
+                posData.clear()
             }
         })
+
+        // Stop Reading
+        TSStopBtn.setOnClickListener {
+            msdkInfoVm.leicaController.stop()
+        }
+        // Disconnect TS16
+        TSDisconnectBtn.setOnClickListener {
+            msdkInfoVm.leicaController.close()
+            Thread.sleep(500)
+        }
 
 
     }
