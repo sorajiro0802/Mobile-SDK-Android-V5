@@ -1,21 +1,21 @@
 package dji.sampleV5.modulecommon
 
+import SaveList
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
+import android.util.Log
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import dji.sampleV5.modulecommon.models.BaseMainActivityVm
-import dji.sampleV5.modulecommon.models.MSDKInfoVm
-import dji.sampleV5.modulecommon.models.MSDKManagerVM
-import dji.sampleV5.modulecommon.models.globalViewModels
+import androidx.lifecycle.Observer
+import dji.sampleV5.modulecommon.models.*
 import dji.sampleV5.modulecommon.util.Helper
 import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.utils.common.LogUtils
@@ -23,6 +23,7 @@ import dji.v5.utils.common.PermissionUtil
 import dji.v5.utils.common.StringUtils
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.*
 
 /**
  * Class Description
@@ -33,7 +34,6 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Copyright (c) 2022, DJI All Rights Reserved.
  */
 abstract class DJIMainActivity : AppCompatActivity() {
-
     val tag: String = LogUtils.getTag(this)
     private val permissionArray = arrayListOf(
         Manifest.permission.RECORD_AUDIO,
@@ -41,7 +41,6 @@ abstract class DJIMainActivity : AppCompatActivity() {
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
     )
-
     init {
         permissionArray.apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -55,13 +54,14 @@ abstract class DJIMainActivity : AppCompatActivity() {
 
         }
     }
-
     private val baseMainActivityVm: BaseMainActivityVm by viewModels()
-    private val msdkInfoVm: MSDKInfoVm by viewModels()
+    protected val msdkInfoVm: MSDKInfoVm by viewModels()
     private val msdkManagerVM: MSDKManagerVM by globalViewModels()
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val disposable = CompositeDisposable()
-
+    private val posData = mutableListOf<String>()
+    private var timesync: TimeSyncVM = TimeSyncVM()
+    private val timesyncData = mutableListOf<String>()
     abstract fun prepareUxActivity()
 
     abstract fun prepareTestingToolsActivity()
@@ -77,6 +77,113 @@ abstract class DJIMainActivity : AppCompatActivity() {
         initMSDKInfoView()
         observeSDKManagerStatus()
         checkPermissionAndRequest()
+
+
+        //////////////////////////////////  Time Synchronization  //////////////////////////////////
+        val timeSyncBtn: Button = findViewById<Button>(R.id.synctimeButton)
+        val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton); timeSyncStopBtn.isEnabled = false
+        val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
+        val timeDiff: TextView = findViewById<TextView>(R.id.text_view_timeDiff)
+
+        timeSyncBtn.setOnClickListener(View.OnClickListener {
+            // Button Toggle
+            it.isEnabled = false
+            timeSyncStopBtn.isEnabled = true
+            // Start synchronization
+            timesync.setAddress(timeSyncAddr.text.toString(), 8020)
+            timesync.sync()
+            // add CSV header
+            timesyncData.add("ServerTime,ClientTime")
+        })
+
+        timeSyncStopBtn.setOnClickListener(View.OnClickListener {
+            // Button Toggle
+            it.isEnabled = false
+            timeSyncBtn.isEnabled = true
+            // Stop synchro
+            timesync.stop()
+
+            // save timesync log
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/Timesynchronisation Logs"
+            val filename = "tmp_data_202309301441.csv"
+            val filepath = "$saveDir/$filename"
+            val saver = SaveList()
+            saver.set(filepath)
+
+            // save list data to text file
+            val time = saver.save(timesyncData)
+            Log.d("FileSaveTime TS Data", "$time ms")
+            timesyncData.clear()
+        })
+
+        // 時間同期サーバから受信した時間データ
+        timesync.serverTime.observe(this, Observer{
+            Log.d(tag, "Data:$it")
+            // 改行コードを抜く
+            val server_date = it.replace("\n", "")
+            val client_data = timesync.getNowDate()
+            timesyncData.add("$server_date,$client_data")
+
+            val timediff = timesync.calcTimeDiff(server_date, client_data)
+            timeDiff.text = "time diff: $timediff ms"
+        })
+
+
+        //////////////////////////////////  Total Station  //////////////////////////////////
+        val TSConnectBtn: Button = findViewById<Button>(R.id.bt_connectTS)
+        val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
+        val TSStopBtn: Button = findViewById<Button>(R.id.bt_stopTS)
+        val TSDisconnectBtn: Button = findViewById<Button>(R.id.bt_disconnectTS)
+
+        val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
+        // Connection for TS16
+        TSConnectBtn.setOnClickListener{v->(
+                    if(msdkInfoVm.leicaController.connect() == 0){
+                        Log.d(tag, "successfully connected")
+                        this.exceptionToast("Success connecting to TS16")
+                        msdkInfoVm.updateTSConnectionStatus()
+                    } else {
+                        Log.d(tag, "failed to connect")
+                        this.exceptionToast("Failed connecting to TS16")
+                        msdkInfoVm.updateTSConnectionStatus()
+                    }
+            )}
+        // Reading
+        TSReadBtn.setOnClickListener(View.OnClickListener{
+            msdkInfoVm.leicaController.read()
+        })
+        msdkInfoVm.leicaController.prismPos.observe(this, Observer {
+            tvLeicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
+            posData.add(it)
+
+            // TS16で取得したデータを保存する
+            val saveBatchSize = 100
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/TS16Data"
+            val filename = "tmp_data_ts16_1.txt"
+            val filepath = "$saveDir/$filename"
+            val saver = SaveList()
+            saver.set(filepath)
+
+            if(posData.size >= saveBatchSize){
+                var time = saver.save(posData)
+                Log.d("FileSaveTime TS Data", "$time ms")
+                posData.clear()
+            }
+        })
+
+        // Stop Reading
+        TSStopBtn.setOnClickListener {
+            msdkInfoVm.leicaController.stop()
+        }
+        // Disconnect TS16
+        TSDisconnectBtn.setOnClickListener {
+            msdkInfoVm.leicaController.close()
+            Thread.sleep(500)
+        }
+
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -106,6 +213,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
             text_view_package_product_category.text = StringUtils.getResStr(R.string.package_product_category, it.packageProductCategory)
             text_view_is_debug.text = StringUtils.getResStr(R.string.is_sdk_debug, it.isDebug)
             text_core_info.text = it.coreInfo.toString()
+            text_view_TSConnection.text = StringUtils.getResStr(R.string.ts_connection, it.tsConnection)
+//            tv_leicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it.tsValue)
         }
 
         icon_sdk_forum.setOnClickListener {
@@ -214,5 +323,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
         super.onDestroy()
         disposable.dispose()
         ToastUtils.destroy()
+    }
+    private fun exceptionToast(res: String) {
+        Toast.makeText(this@DJIMainActivity, res, Toast.LENGTH_SHORT).show()
     }
 }

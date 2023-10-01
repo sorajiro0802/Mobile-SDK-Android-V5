@@ -1,12 +1,9 @@
 package dji.sampleV5.modulecommon.models
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dji.sampleV5.modulecommon.data.*
 import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.sdk.keyvalue.key.ProductKey
-import dji.v5.common.error.DJINetworkError
 import dji.v5.et.create
 import dji.v5.et.get
 import dji.v5.et.listen
@@ -18,10 +15,6 @@ import dji.v5.manager.ldm.LDMManager
 import dji.v5.network.DJINetworkManager
 import dji.v5.network.IDJINetworkStatusListener
 import dji.v5.utils.common.LogUtils
-import dji.v5.utils.inner.SDKConfig
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -39,6 +32,7 @@ class MSDKInfoVm : DJIViewModel() {
     private val msdkInfoModel: MSDKInfoModel = MSDKInfoModel()
     private var areaCodeChangeListener: AreaCodeChangeListener
     private var netWorkStatusListener: IDJINetworkStatusListener
+    var leicaController: LeicaControllerVM = LeicaControllerVM()
 
     init {
         msdkInfo.value = MSDKInfo(msdkInfoModel.getSDKVersion())
@@ -47,6 +41,8 @@ class MSDKInfoVm : DJIViewModel() {
         msdkInfo.value?.packageProductCategory = msdkInfoModel.getPackageProductCategory()
         msdkInfo.value?.isLDMEnabled = LDMManager.getInstance().isLDMEnabled.toString()
         msdkInfo.value?.isLDMLicenseLoaded = LDMManager.getInstance().isLDMLicenseLoaded.toString()
+        msdkInfo.value?.tsConnection = leicaController.isConnected()
+//        msdkInfo.value?.tsValue = leicaController.prismPos.toString()
         msdkInfo.value?.coreInfo = msdkInfoModel.getCoreInfo()
 
         areaCodeChangeListener = AreaCodeChangeListener { _, changed ->
@@ -130,6 +126,10 @@ class MSDKInfoVm : DJIViewModel() {
     fun updateLDMStatus() {
         msdkInfo.value?.isLDMEnabled = LDMManager.getInstance().isLDMEnabled.toString()
         msdkInfo.value?.isLDMLicenseLoaded = LDMManager.getInstance().isLDMLicenseLoaded.toString()
+        refreshMSDKInfo()
+    }
+    fun updateTSConnectionStatus() {
+        msdkInfo.value?.tsConnection = leicaController.isConnected()
         refreshMSDKInfo()
     }
 }

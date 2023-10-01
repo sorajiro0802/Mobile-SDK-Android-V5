@@ -24,4 +24,6 @@ data class MSDKInfo(val SDKVersion: String = DEFAULT_STR) {
     var isLDMLicenseLoaded: String = DEFAULT_STR
     var isLDMEnabled: String = DEFAULT_STR
     var coreInfo: SDKConfig.CoreInfo? = null
+    var tsConnection: Boolean = false
+    var tsValue: String = DEFAULT_STR
 }

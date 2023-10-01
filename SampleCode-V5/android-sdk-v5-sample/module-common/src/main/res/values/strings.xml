@@ -10,6 +10,13 @@ More refer to the release notes." </string>
     <string name="sdk_forum_url">https://sdk-forum.dji.net/hc/en-us/community/topics</string>
     <string name="release_node_url">https://developer.dji.com/doc/mobile-sdk-tutorial/en/</string>
     <string name="tech_support_url">https://sdk-forum.dji.net/hc/en-us/requests/new</string>
+    <string name="tv_leicaStatus" translatable="false">Leica Connection</string>
+    <string name="bt_connectTS" translatable="false">Connect ts</string>
+    <string name="bt_readTS" translatable="false">start reading</string>
+    <string name="tv_leicaValue" translatable="false">Read Info\n %1$s</string>
+    <string name="et_ipHint" translatable="false">server IP Addr</string>
+    <string name="et_ipAddr" translatable="false">192.168.</string>
+    <string name="tv_timeDiff" translatable="false">time diff: ms</string>
 
     <string name="news_dialog_content_tips">MSDK has a new version update, click for details.</string>
     <string name="news_dialog_btn_left">Details</string>
@@ -79,6 +86,7 @@ More refer to the release notes." </string>
     <string name="send_virtual_stick_advanced_param">Send Virtual Stick Advanced Param</string>
     <string name="enable_virtual_stick_advanced_mode">Enable Virtual Stick Advanced Mode</string>
     <string name="disable_virtual_stick_advanced_mode">Disable Virtual Stick Advanced Mode</string>
+    <string name="btn_selfDrive_test" translatable="false">self Drive</string>
 
     <string name="btn_take_off">Take Off</string>
     <string name="btn_landing">Landing</string>
@@ -129,6 +137,7 @@ More refer to the release notes." </string>
     <string name="sdk_forum">SDK Forum</string>
     <string name="release_nodes">Release Nodes</string>
     <string name="tech_support">Tech Support</string>
+    <string name="ts_connection" translatable="false">TS Connection: %1$s</string>
 
     <!-- Data Protection -->
     <string name="switch_product_improvement">Product Improvement Project</string>
@@ -454,5 +463,6 @@ More refer to the release notes." </string>
     <string name="btn_unlock_authorization_fly_zone">Unlock Authorization Fly Zone</string>
     <string name="btn_unlock_enhanced_warning_fly_zone">Unlock Enhanced Warning Fly Zone</string>
     <string name="btn_unlock_all_enhanced_warning_fly_zone">Unlock All Enhanced Warning Fly Zone</string>
+
 
 </resources>
