@@ -17,10 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import dji.sampleV5.modulecommon.models.*
 import dji.sampleV5.modulecommon.util.Helper
+import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.utils.common.LogUtils
 import dji.v5.utils.common.PermissionUtil
 import dji.v5.utils.common.StringUtils
-import dji.v5.utils.common.ToastUtils
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
@@ -206,7 +206,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun initMSDKInfoView() {
-        ToastUtils.init(this)
+        ToastUtils.init()
         msdkInfoVm.msdkInfo.observe(this) {
             text_view_version.text = StringUtils.getResStr(R.string.sdk_version, it.SDKVersion + " " + it.buildVer)
             text_view_product_name.text = StringUtils.getResStr(R.string.product_name, it.productType.name)
@@ -215,15 +215,6 @@ abstract class DJIMainActivity : AppCompatActivity() {
             text_core_info.text = it.coreInfo.toString()
             text_view_TSConnection.text = StringUtils.getResStr(R.string.ts_connection, it.tsConnection)
 //            tv_leicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it.tsValue)
-        }
-        baseMainActivityVm.sdkNews.observe(this) {
-            item_news_msdk.setTitle(StringUtils.getResStr(it.title))
-            item_news_msdk.setDescription(StringUtils.getResStr(it.description))
-            item_news_msdk.setDate(it.date)
-
-            item_news_uxsdk.setTitle(StringUtils.getResStr(it.title))
-            item_news_uxsdk.setDescription(StringUtils.getResStr(it.description))
-            item_news_uxsdk.setDate(it.date)
         }
 
         icon_sdk_forum.setOnClickListener {

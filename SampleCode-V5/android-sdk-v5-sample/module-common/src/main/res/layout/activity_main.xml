@@ -215,17 +215,17 @@
         app:layout_constraintStart_toStartOf="@+id/msg_panel"
         app:layout_constraintTop_toTopOf="@+id/msg_panel" />
 
-    <ScrollView
-        android:id="@+id/scroll_news"
+    <dji.sampleV5.modulecommon.views.VersionInfoView
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="8dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toTopOf="@+id/panel_icon_msg"
         app:layout_constraintEnd_toEndOf="@+id/msg_panel"
         app:layout_constraintHeight_percent="0.65"
         app:layout_constraintStart_toStartOf="@+id/msg_panel"
         app:layout_constraintTop_toBottomOf="@+id/text_view_news_title"
-        app:layout_constraintVertical_bias="0">
+        app:layout_constraintVertical_bias="0" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -333,17 +333,19 @@
 
     </ScrollView>
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/panel_icon_msg"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/msg_panel"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/msg_panel"
-        app:layout_constraintStart_toStartOf="@+id/msg_panel"
-        app:layout_constraintTop_toBottomOf="@+id/scroll_news">
+        app:layout_constraintStart_toStartOf="@+id/msg_panel">
 
         <ImageView
             android:id="@+id/icon_sdk_forum"
@@ -359,7 +361,8 @@
             app:layout_constraintHeight_percent="0.65"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0"></ImageView>
+            app:layout_constraintVertical_bias="0"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -394,7 +397,8 @@
             app:layout_constraintHeight_percent="0.65"
             app:layout_constraintStart_toEndOf="@+id/guide_1"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0"></ImageView>
+            app:layout_constraintVertical_bias="0"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -428,7 +432,8 @@
             app:layout_constraintHeight_percent="0.65"
             app:layout_constraintStart_toEndOf="@+id/guide_2"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0"></ImageView>
+            app:layout_constraintVertical_bias="0"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -450,6 +455,7 @@
         android:textColor="@color/green"
         android:textSize="9dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="SpUsage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
