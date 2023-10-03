@@ -1,10 +1,13 @@
 package dji.sampleV5.moduleaircraft.pages
 
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import dji.sampleV5.modulecommon.pages.DJIFragment
 import dji.sampleV5.modulecommon.util.Helper
 import dji.sampleV5.moduleaircraft.R
@@ -14,14 +17,16 @@ import dji.sampleV5.moduleaircraft.models.VirtualStickVM
 import dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystick
 import dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystickListener
 import dji.sampleV5.modulecommon.keyvalue.KeyValueDialogUtil
+import dji.sampleV5.modulecommon.models.LeicaControllerVM
+import dji.sampleV5.modulecommon.util.SaveList
 import dji.sdk.keyvalue.value.common.EmptyMsg
 import dji.sdk.keyvalue.value.flightcontroller.VirtualStickFlightControlParam
 import dji.v5.common.callback.CommonCallbacks
 import dji.v5.common.error.IDJIError
 import dji.v5.manager.aircraft.virtualstick.Stick
 import dji.v5.utils.common.JsonUtil
-import dji.v5.utils.common.LogUtils
 import dji.sampleV5.modulecommon.util.ToastUtils
+import dji.v5.utils.common.StringUtils
 import kotlinx.android.synthetic.main.frag_virtual_stick_page.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -41,6 +46,10 @@ class VirtualStickFragment : DJIFragment() {
     private val virtualStickVM: VirtualStickVM by activityViewModels()
     private val simulatorVM: SimulatorVM by activityViewModels()
     private val deviation: Double = 0.02
+    private val leicaCtlVM: LeicaControllerVM by viewModels()
+
+    // TS data receiver
+    private val posData = mutableListOf<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,7 +64,40 @@ class VirtualStickFragment : DJIFragment() {
         widget_horizontal_situation_indicator.setSimpleModeEnable(false)
         initBtnClickListener()
         initStickListener()
+
+        // Buttons for TS16
+        connectTSBtnLintener()
+        readTSBtnListener()
+        stopTSBtnListener()
+        disconnectTSBtnListener()
+
+        // Button for controlling Drone
         selfDriveBtnListener()
+
+        // Prism Position Data Observer
+        leicaCtlVM.prismPos.observe(viewLifecycleOwner) {
+            tv_leicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
+            posData.add(it)
+
+            // TS16で取得したデータを保存する
+            //  リストをバッチ的に保存する
+            val saveBatchSize = 100
+            //   保存するファイルパス
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/TS16Data"
+            //  EditTextから保存ファイル名を取得する
+            val filename = et_saveFileName.text.toString()
+            val filepath = "$saveDir/$filename.txt"
+            val saver = SaveList()
+            saver.set(filepath)
+
+            if(posData.size >= saveBatchSize){
+                var time = saver.save(posData)
+                Log.d("FileSaveTime TS Data", "$time ms")
+                posData.clear()
+            }
+        }
+
         virtualStickVM.listenRCStick()
         virtualStickVM.currentSpeedLevel.observe(viewLifecycleOwner) {
             updateVirtualStickInfo()
@@ -211,6 +253,43 @@ class VirtualStickFragment : DJIFragment() {
 
             println("Finish!!")
         }
+    }
+
+    private fun connectTSBtnLintener() {
+        bt_connectTS.setOnClickListener {
+                if(leicaCtlVM.connect() == 0) {
+                    Log.d(tag, "successfully connected")
+                    ToastUtils.showToast("Success connecting to TS16")
+                } else {
+                    Log.d(tag, "failed to connect")
+                    ToastUtils.showToast("Failed connecting to TS16")
+                }
+            }
+    }
+
+    // Start Reading
+    private fun readTSBtnListener() {
+        bt_readTS.setOnClickListener {
+            leicaCtlVM.read()
+            ToastUtils.showToast("Start Reading")
+        }
+    }
+
+    // Stop Reading
+    private fun stopTSBtnListener() {
+        bt_stopTS.setOnClickListener {
+            leicaCtlVM.stop()
+            ToastUtils.showToast("Stop Reading")
+        }
+    }
+
+    // Disconnect TS16
+    private fun disconnectTSBtnListener() {
+        bt_disconnectTS.setOnClickListener {
+            leicaCtlVM.close()
+            ToastUtils.showToast("Disconnect")
+
+            }
     }
 
 
