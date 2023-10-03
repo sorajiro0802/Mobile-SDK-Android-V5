@@ -1,6 +1,5 @@
 package dji.sampleV5.modulecommon
 
-import SaveList
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -21,6 +20,7 @@ import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.utils.common.LogUtils
 import dji.v5.utils.common.PermissionUtil
 import dji.v5.utils.common.StringUtils
+import dji.sampleV5.modulecommon.util.SaveList
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
@@ -106,7 +106,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // save timesync log
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/Timesynchronisation Logs"
-            val filename = "tmp_data_202309301441.csv"
+            val filename = "tmp_data_202309301441.txt"
             val filepath = "$saveDir/$filename"
             val saver = SaveList()
             saver.set(filepath)
