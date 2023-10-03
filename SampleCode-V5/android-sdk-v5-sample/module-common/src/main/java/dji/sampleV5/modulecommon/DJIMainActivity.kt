@@ -106,7 +106,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // save timesync log
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/Timesynchronisation Logs"
-            val filename = "tmp_data_202309301441.csv"
+            val filename = "tmp_data_202309301441.txt"
             val filepath = "$saveDir/$filename"
             val saver = SaveList()
             saver.set(filepath)
