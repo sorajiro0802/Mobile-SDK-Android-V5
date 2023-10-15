@@ -190,13 +190,13 @@
                 android:id="@+id/bt_readTS"
                 android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:text="@string/bt_readTS" />
+                android:text="@string/bt_readTS"/>
 
             <Button
                 android:id="@+id/bt_stopTS"
                 android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:text="Stop reading" />
+                android:text="Stop reading"/>
 
             <Button
                 android:id="@+id/bt_disconnectTS"
@@ -204,13 +204,6 @@
                 android:layout_height="wrap_content"
                 android:text="Disconnect TS" />
 
-            <EditText
-                android:id="@+id/et_saveFileName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="FileName for saving"
-                android:inputType="text"
-                android:textColor="@color/black" />
         </LinearLayout>
 
         <TextView

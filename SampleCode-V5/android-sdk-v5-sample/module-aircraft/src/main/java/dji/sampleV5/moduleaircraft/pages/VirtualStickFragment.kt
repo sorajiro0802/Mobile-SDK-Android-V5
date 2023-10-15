@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlin.collections.mutableListOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import dji.sampleV5.modulecommon.pages.DJIFragment
@@ -30,6 +31,9 @@ import dji.v5.utils.common.StringUtils
 import kotlinx.android.synthetic.main.frag_virtual_stick_page.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.abs
 
 /**
@@ -49,7 +53,9 @@ class VirtualStickFragment : DJIFragment() {
     private val leicaCtlVM: LeicaControllerVM by viewModels()
 
     // TS data receiver
-    private val posData = mutableListOf<String>()
+    private var posData = mutableListOf<String>()
+    // saver
+    val LeicaSaver = SaveList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,22 +84,12 @@ class VirtualStickFragment : DJIFragment() {
         leicaCtlVM.prismPos.observe(viewLifecycleOwner) {
             tv_leicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
             posData.add(it)
-
             // TS16で取得したデータを保存する
             //  リストをバッチ的に保存する
             val saveBatchSize = 100
-            //   保存するファイルパス
-            val homeDir = Environment.getExternalStorageDirectory().absolutePath
-            val saveDir = "$homeDir/TS16Data"
-            //  EditTextから保存ファイル名を取得する
-            val filename = et_saveFileName.text.toString()
-            val filepath = "$saveDir/$filename.txt"
-            val saver = SaveList()
-            saver.set(filepath)
-
             if(posData.size >= saveBatchSize){
-                var time = saver.save(posData)
-                Log.d("FileSaveTime TS Data", "$time ms")
+                var time = LeicaSaver.save(posData)
+                ToastUtils.showToast("FileSaveTime : $time ms")
                 posData.clear()
             }
         }
@@ -270,15 +266,30 @@ class VirtualStickFragment : DJIFragment() {
     // Start Reading
     private fun readTSBtnListener() {
         bt_readTS.setOnClickListener {
-            leicaCtlVM.read()
+            if(leicaCtlVM.mReceiveTask?.isAlive != true) {
+                leicaCtlVM.read()
+            }
+            posData.clear()
             ToastUtils.showToast("Start Reading")
+            //   保存するファイルパス
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/TS16Data"
+            //  EditTextから保存ファイル名を取得する
+            val filename = "leicaPosLog_${getDate4filename()}.txt"
+            val filepath = "$saveDir/$filename"
+            LeicaSaver.set(filepath)
         }
     }
 
     // Stop Reading
     private fun stopTSBtnListener() {
         bt_stopTS.setOnClickListener {
-            leicaCtlVM.stop()
+//            leicaCtlVM.stop()
+            if (posData.size > 0){
+                LeicaSaver.save(posData)
+                ToastUtils.showToast("Saving Log Data...")
+                posData.clear()
+            }
             ToastUtils.showToast("Stop Reading")
         }
     }
@@ -356,5 +367,11 @@ class VirtualStickFragment : DJIFragment() {
         mainHandler.post {
             virtual_stick_info_tv.text = builder.toString()
         }
+    }
+
+    private fun getDate4filename() : String{
+        val df: DateFormat = SimpleDateFormat("yyyyMMdd_HHmmss")
+        val date: Date = Date(System.currentTimeMillis())
+        return df.format(date)
     }
 }

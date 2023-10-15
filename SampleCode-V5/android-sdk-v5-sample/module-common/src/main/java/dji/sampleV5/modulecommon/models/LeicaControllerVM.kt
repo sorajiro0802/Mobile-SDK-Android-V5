@@ -56,7 +56,7 @@ class LeicaControllerVM() : DJIViewModel(){
     fun stop(){
 
         try {
-            prismPos.postValue("")
+//            prismPos.postValue("")
         } catch (e: InterruptedException){
             e.printStackTrace()
         }

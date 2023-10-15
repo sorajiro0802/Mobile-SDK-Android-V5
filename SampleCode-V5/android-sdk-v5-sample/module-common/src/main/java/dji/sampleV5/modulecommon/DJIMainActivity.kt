@@ -24,6 +24,9 @@ import dji.sampleV5.modulecommon.util.SaveList
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Class Description
@@ -84,6 +87,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
         val timeSyncStopBtn: Button = findViewById<Button>(R.id.syncTime_stopButton); timeSyncStopBtn.isEnabled = false
         val timeSyncAddr: EditText = findViewById<EditText>(R.id.edit_text_ipAddr)
         val timeDiff: TextView = findViewById<TextView>(R.id.text_view_timeDiff)
+        val timeSyncSaver = SaveList()
+        var cnt = 0
 
         timeSyncBtn.setOnClickListener(View.OnClickListener {
             // Button Toggle
@@ -93,7 +98,15 @@ abstract class DJIMainActivity : AppCompatActivity() {
             timesync.setAddress(timeSyncAddr.text.toString(), 8020)
             timesync.sync()
             // add CSV header
-            timesyncData.add("ServerTime,ClientTime")
+            timesyncData.add("ServerTime,ClientTimeReceive")
+
+            // save timesync log
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/Timesynchronisation Logs"
+            val filename = "timesyncLog_${getDate4filename()}_2.txt"
+            val filepath = "$saveDir/$filename"
+            timeSyncSaver.set(filepath)
+
         })
 
         timeSyncStopBtn.setOnClickListener(View.OnClickListener {
@@ -103,16 +116,10 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // Stop synchro
             timesync.stop()
 
-            // save timesync log
-            val homeDir = Environment.getExternalStorageDirectory().absolutePath
-            val saveDir = "$homeDir/Timesynchronisation Logs"
-            val filename = "tmp_data_202309301441.txt"
-            val filepath = "$saveDir/$filename"
-            val saver = SaveList()
-            saver.set(filepath)
-
             // save list data to text file
-            val time = saver.save(timesyncData)
+            val time = timeSyncSaver.save(timesyncData)
+            cnt = 0
+
             Log.d("FileSaveTime TS Data", "$time ms")
             timesyncData.clear()
         })
@@ -123,7 +130,8 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // 改行コードを抜く
             val server_date = it.replace("\n", "")
             val client_data = timesync.getNowDate()
-            timesyncData.add("$server_date,$client_data")
+            timesyncData.add("$cnt,$server_date,$client_data")
+            cnt++
 
             val timediff = timesync.calcTimeDiff(server_date, client_data)
             timeDiff.text = "time diff: $timediff ms"
@@ -135,7 +143,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
         val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
         val TSStopBtn: Button = findViewById<Button>(R.id.bt_stopTS)
         val TSDisconnectBtn: Button = findViewById<Button>(R.id.bt_disconnectTS)
-
+        val LeicaSaver = SaveList()
         val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
         // Connection for TS16
         TSConnectBtn.setOnClickListener{v->(
@@ -152,6 +160,12 @@ abstract class DJIMainActivity : AppCompatActivity() {
         // Reading
         TSReadBtn.setOnClickListener(View.OnClickListener{
             msdkInfoVm.leicaController.read()
+            // for saving log
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val saveDir = "$homeDir/TS16Data"
+            val filename = "leicaPosLog_${getDate4filename()}.txt"
+            val filepath = "$saveDir/$filename"
+            LeicaSaver.set(filepath)
         })
         msdkInfoVm.leicaController.prismPos.observe(this, Observer {
             tvLeicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
@@ -159,15 +173,9 @@ abstract class DJIMainActivity : AppCompatActivity() {
 
             // TS16で取得したデータを保存する
             val saveBatchSize = 100
-            val homeDir = Environment.getExternalStorageDirectory().absolutePath
-            val saveDir = "$homeDir/TS16Data"
-            val filename = "tmp_data_ts16_1.txt"
-            val filepath = "$saveDir/$filename"
-            val saver = SaveList()
-            saver.set(filepath)
 
             if(posData.size >= saveBatchSize){
-                var time = saver.save(posData)
+                var time = LeicaSaver.save(posData)
                 Log.d("FileSaveTime TS Data", "$time ms")
                 posData.clear()
             }
@@ -176,6 +184,10 @@ abstract class DJIMainActivity : AppCompatActivity() {
         // Stop Reading
         TSStopBtn.setOnClickListener {
             msdkInfoVm.leicaController.stop()
+            if (posData.size > 0) {
+                LeicaSaver.save(posData)
+                posData.clear()
+            }
         }
         // Disconnect TS16
         TSDisconnectBtn.setOnClickListener {
@@ -326,5 +338,11 @@ abstract class DJIMainActivity : AppCompatActivity() {
     }
     private fun exceptionToast(res: String) {
         Toast.makeText(this@DJIMainActivity, res, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun getDate4filename() : String{
+        val df: DateFormat = SimpleDateFormat("yyyyMMdd_HHmmss")
+        val date: Date = Date(System.currentTimeMillis())
+        return df.format(date)
     }
 }
