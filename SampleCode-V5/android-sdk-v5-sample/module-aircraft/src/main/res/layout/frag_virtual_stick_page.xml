@@ -126,43 +126,75 @@
         android:text="simulator state info:"
         android:textSize="13dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </TextView>
+        app:layout_constraintTop_toTopOf="parent"></TextView>
 
     <dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystick
         android:id="@+id/left_stick_view"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:background="@mipmap/joystick_bg"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:layout_constraintStart_toEndOf="@+id/stick_button_list"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/stick_button_list" />
 
     <dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystick
         android:id="@+id/right_stick_view"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:background="@mipmap/joystick_bg"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <dji.v5.ux.core.widget.hsi.HorizontalSituationIndicatorWidget
         android:id="@+id/widget_horizontal_situation_indicator"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/stick_button_list"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/stick_button_list"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
-    <Button
-        android:id="@+id/btn_selfDrive_test"
+    <TextView
+        android:id="@+id/tv_selfControl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_selfDrive_test"
+        android:layout_marginTop="48dp"
+        android:text="Self Drive Control"
+        android:layout_marginRight="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/simulator_state_info_tv" />
+
+    <Button
+        android:id="@+id/btn_selfDrive_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="start"
         app:layout_constraintBottom_toTopOf="@+id/right_stick_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/virtual_stick_info_tv" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_selfControl"
+        app:layout_constraintVertical_bias="0" />
+
+    <Button
+        android:id="@+id/btn_selfDrive_stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="stop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_selfDrive_start" />
+    <Button
+        android:id="@+id/btn_selfDrive_continue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="continue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_selfDrive_stop" />
+    <Button
+        android:id="@+id/btn_selfDrive_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="reset"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_selfDrive_continue" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -190,13 +222,13 @@
                 android:id="@+id/bt_readTS"
                 android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:text="@string/bt_readTS"/>
+                android:text="@string/bt_readTS" />
 
             <Button
                 android:id="@+id/bt_stopTS"
                 android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:text="Stop reading"/>
+                android:text="Stop reading" />
 
             <Button
                 android:id="@+id/bt_disconnectTS"

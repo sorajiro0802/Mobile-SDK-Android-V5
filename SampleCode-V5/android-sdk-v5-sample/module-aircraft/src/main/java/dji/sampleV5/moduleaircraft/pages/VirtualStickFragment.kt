@@ -1,40 +1,49 @@
 package dji.sampleV5.moduleaircraft.pages
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlin.collections.mutableListOf
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import dji.sampleV5.modulecommon.pages.DJIFragment
-import dji.sampleV5.modulecommon.util.Helper
 import dji.sampleV5.moduleaircraft.R
 import dji.sampleV5.moduleaircraft.models.BasicAircraftControlVM
+import dji.sampleV5.moduleaircraft.models.SelfDriveVM
 import dji.sampleV5.moduleaircraft.models.SimulatorVM
 import dji.sampleV5.moduleaircraft.models.VirtualStickVM
 import dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystick
 import dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystickListener
+import dji.sampleV5.modulecommon.DJIMainActivity
 import dji.sampleV5.modulecommon.keyvalue.KeyValueDialogUtil
 import dji.sampleV5.modulecommon.models.LeicaControllerVM
+import dji.sampleV5.modulecommon.pages.DJIFragment
+import dji.sampleV5.modulecommon.util.Helper
 import dji.sampleV5.modulecommon.util.SaveList
+import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.sdk.keyvalue.value.common.EmptyMsg
 import dji.sdk.keyvalue.value.flightcontroller.VirtualStickFlightControlParam
 import dji.v5.common.callback.CommonCallbacks
 import dji.v5.common.error.IDJIError
 import dji.v5.manager.aircraft.virtualstick.Stick
 import dji.v5.utils.common.JsonUtil
-import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.utils.common.StringUtils
 import kotlinx.android.synthetic.main.frag_virtual_stick_page.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.security.Permission
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
+import dji.sampleV5.moduleaircraft.pages.VirtualStickFragment as VirtualStickFragment1
+
 
 /**
  * Class Description
@@ -47,7 +56,7 @@ import kotlin.math.abs
 class VirtualStickFragment : DJIFragment() {
 
     private val basicAircraftControlVM: BasicAircraftControlVM by activityViewModels()
-    private val virtualStickVM: VirtualStickVM by activityViewModels()
+    val virtualStickVM: VirtualStickVM by activityViewModels()
     private val simulatorVM: SimulatorVM by activityViewModels()
     private val deviation: Double = 0.02
     private val leicaCtlVM: LeicaControllerVM by viewModels()
@@ -55,7 +64,13 @@ class VirtualStickFragment : DJIFragment() {
     // TS data receiver
     private var posData = mutableListOf<String>()
     // saver
-    val LeicaSaver = SaveList()
+    private val LeicaSaver = SaveList()
+
+    val REQUEST_EXTERNAL_STORAGE_CODE = 0x01
+    val mPermissions = arrayOf<String>(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,7 +93,8 @@ class VirtualStickFragment : DJIFragment() {
         disconnectTSBtnListener()
 
         // Button for controlling Drone
-        selfDriveBtnListener()
+        selfDriveStartBtnListener()
+        selfDriveStopBtnListener()
 
         // Prism Position Data Observer
         leicaCtlVM.prismPos.observe(viewLifecycleOwner) {
@@ -88,7 +104,7 @@ class VirtualStickFragment : DJIFragment() {
             //  リストをバッチ的に保存する
             val saveBatchSize = 100
             if(posData.size >= saveBatchSize){
-                var time = LeicaSaver.save(posData)
+                val time = LeicaSaver.save(posData)
                 ToastUtils.showToast("FileSaveTime : $time ms")
                 posData.clear()
             }
@@ -206,7 +222,7 @@ class VirtualStickFragment : DJIFragment() {
         }
     }
 
-    private fun selfDriveBtnListener() {
+    private fun selfDriveStartBtnListener() {
         fun goStraight(p: Float, duration: Long){
             println("Go Straight!!!")
             runBlocking {
@@ -233,7 +249,7 @@ class VirtualStickFragment : DJIFragment() {
         }
 
         // Main Program is below
-        btn_selfDrive_test.setOnClickListener{
+        btn_selfDrive_start.setOnClickListener{
             // start starting
             println("Start!!")
 //            turnRight(1.0F, 1200) // p=1.0, d=1200 : Rotate about 90°
@@ -250,6 +266,16 @@ class VirtualStickFragment : DJIFragment() {
             println("Finish!!")
         }
     }
+    private fun selfDriveStopBtnListener(){
+        val selfdrivevm = SelfDriveVM(virtualStickVM)
+        val homeDir = Environment.getExternalStorageDirectory().absolutePath
+        val savePath = "$homeDir/testScenarioScript.txt"
+        btn_selfDrive_stop.setOnClickListener {
+            selfdrivevm.setScenarioScript(savePath)
+        }
+    }
+    private fun selfDriveContinueBtnListener(){}
+    private fun selfDriveResetBtnListener(){}
 
     private fun connectTSBtnLintener() {
         bt_connectTS.setOnClickListener {
