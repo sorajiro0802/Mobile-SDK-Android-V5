@@ -234,24 +234,6 @@ class VirtualStickFragment : DJIFragment() {
     }
 
     private fun selfDriveStartBtnListener() {
-        /*fun goStraight(p: Float, duration: Long){
-            println("Go Straight!!!")
-            runBlocking {
-                // 右のvirtual stickを真っ直ぐに倒す ： 直進する
-                virtualStickVM.setRightPosition(
-                    0,
-                    (p * Stick.MAX_STICK_POSITION_ABS).toInt())
-                delay(duration)
-            }
-            // 直進した後，スティックを中央に戻す
-            virtualStickVM.setRightPosition(0, 0)
-        }*/
-
-//        val homeDir = Environment.getExternalStorageDirectory().absolutePath
-//        val savePath = "$homeDir/Download/testScenarioScript.txt"
-//        btn_selfDrive_start.setOnClickListener {
-//            selfdrivevm.setScenarioScript(savePath)
-//        }
         btn_selfDrive_start.setOnClickListener {
             val speed = 0.05
             virtualStickVM.setSpeedLevel(speed)
@@ -269,7 +251,7 @@ class VirtualStickFragment : DJIFragment() {
         }
     }
     private fun selfDriveStopBtnListener(){btn_selfDrive_stop.setOnClickListener { selfdrivevm.stopMoving() }}
-    private fun selfDriveContinueBtnListener(){btn_selfDrive_continue.setOnClickListener {  }}
+    private fun selfDriveContinueBtnListener(){btn_selfDrive_continue.setOnClickListener { selfdrivevm.continueMoving() }}
     private fun selfDriveResetBtnListener(){btn_selfDrive_reset.setOnClickListener {  }}
     private fun setOriginBtnListener(){bt_setOrigin.setOnClickListener { selfdrivevm.setOriginPos(prismPos)}}
     private fun setXAxisBtnListener(){bt_setXAxis.setOnClickListener { selfdrivevm.setXAxisPos(prismPos) }}
