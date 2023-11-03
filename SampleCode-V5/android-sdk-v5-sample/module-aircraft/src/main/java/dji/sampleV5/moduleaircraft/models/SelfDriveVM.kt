@@ -20,10 +20,10 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private var calibOriginPos: FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     private var calibXAxisPos: FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     private var calibZOffsetPos: Float = .0f
-    var currDronePoint:FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
+    private var currDronePoint:FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     val valueObserver: ValueUpdateObserver = ValueUpdateObserver()
     var observerFlag = true
-    private val tolerance = .1f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
+    private val tolerance = .05f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
 
 
     private var scenarioPoints: Array<FloatArray> = arrayOf(
@@ -82,6 +82,9 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
 
         }catch(e: Exception){
             Log.d(TAG, "$e")
+            // reset stick values
+            virtualStickVM.setRightPosition(0,0)
+            virtualStickVM.setLeftPosition(0,0)
         }
     }
 
@@ -136,11 +139,11 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     fun setScenarioScript(path:String){//TODO: ファイルアクセスがようわからんくて未完成,スタブ(scenarioPoints)でとりあえずは対応
         scenarioFile = File(path)
         try {
-            val inputstream: FileInputStream = FileInputStream(scenarioFile)
-            val reader: InputStreamReader = InputStreamReader(inputstream)
+            val inputStream: FileInputStream = FileInputStream(scenarioFile)
+            val reader: InputStreamReader = InputStreamReader(inputStream)
             Log.d("ReadScenario", reader.readText())
 
-            inputstream.close()
+            inputStream.close()
             reader.close()
         } catch(e: Exception) {
             Log.e("ReadScenario", e.toString())
