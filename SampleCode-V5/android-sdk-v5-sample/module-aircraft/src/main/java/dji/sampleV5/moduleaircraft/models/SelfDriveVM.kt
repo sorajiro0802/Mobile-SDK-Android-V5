@@ -152,6 +152,10 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
         return scenarioFile
     }
 
+    fun getCurDronePos(): FloatArray {
+        return currDronePoint
+    }
+
     private fun calcL2Norm(p1: FloatArray, p2: FloatArray): Float {
         var sum = 0f
         for (i in p1.indices) {

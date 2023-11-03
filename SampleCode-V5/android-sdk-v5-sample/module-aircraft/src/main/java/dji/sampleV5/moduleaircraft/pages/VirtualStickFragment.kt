@@ -107,9 +107,9 @@ class VirtualStickFragment : DJIFragment() {
             prismPos = extractFloatsFromInput(it)
             selfdrivevm.setTSvaluePrefix(it.split(",")[0])
             selfdrivevm.setTSPos(prismPos)
-                // show calibrated TSValue on Screen
-            tv_calibratedTSPos.text = StringUtils.getResStr(R.string.tv_calibratedLeicaPos, "${
-                it.split(",")[0]},${selfdrivevm.currDronePoint[0]},${selfdrivevm.currDronePoint[1]},${selfdrivevm.currDronePoint[2]}")
+            // show calibrated TSValue on Screen
+            val curDronePos = selfdrivevm.getCurDronePos()
+            tv_calibratedTSPos.text = StringUtils.getResStr(R.string.tv_calibratedLeicaPos, "${it.split(",")[0]},${curDronePos[0]},${curDronePos[1]},${curDronePos[2]}")
             // TS16で取得したデータを保存する
             //  リストをバッチ的に保存する
             tsData.add(it)
