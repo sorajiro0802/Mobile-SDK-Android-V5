@@ -155,6 +155,45 @@
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Calibration \nUAV Coordinate"
+        app:layout_constraintEnd_toStartOf="@+id/tv_selfControl"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/bt_setOrigin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Origin"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="@+id/textView2"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <Button
+        android:id="@+id/bt_setXAxis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set X Axis"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="@+id/textView2"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/bt_setOrigin" />
+
+    <Button
+        android:id="@+id/bt_setZPosOffset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Z offset"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="@+id/bt_setXAxis"
+        app:layout_constraintStart_toStartOf="@+id/bt_setXAxis"
+        app:layout_constraintTop_toBottomOf="@+id/bt_setXAxis" />
+
+    <TextView
         android:id="@+id/tv_selfControl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -170,7 +209,8 @@
         android:layout_height="wrap_content"
         android:text="start"
         app:layout_constraintBottom_toTopOf="@+id/right_stick_view"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tv_selfControl"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
         app:layout_constraintTop_toBottomOf="@+id/tv_selfControl"
         app:layout_constraintVertical_bias="0" />
 
@@ -179,21 +219,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="stop"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_selfDrive_start"
+        app:layout_constraintStart_toStartOf="@+id/btn_selfDrive_start"
         app:layout_constraintTop_toBottomOf="@+id/btn_selfDrive_start" />
+
     <Button
         android:id="@+id/btn_selfDrive_continue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="continue"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_selfDrive_stop"
+        app:layout_constraintStart_toStartOf="@+id/btn_selfDrive_stop"
         app:layout_constraintTop_toBottomOf="@+id/btn_selfDrive_stop" />
+
     <Button
         android:id="@+id/btn_selfDrive_reset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="reset"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_selfDrive_continue"
+        app:layout_constraintStart_toStartOf="@+id/btn_selfDrive_continue"
         app:layout_constraintTop_toBottomOf="@+id/btn_selfDrive_continue" />
 
     <LinearLayout
@@ -245,6 +290,12 @@
             android:text="@string/tv_leicaValue"
             android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout3" />
+        <TextView
+            android:id="@+id/tv_calibratedTSPos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tv_calibratedLeicaPos"
+            android:textColor="@color/black"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

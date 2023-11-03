@@ -30,4 +30,6 @@ dependencies {
     api project(':uxsdk')
 
     compileOnly deps.aircraftProvided
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
 }

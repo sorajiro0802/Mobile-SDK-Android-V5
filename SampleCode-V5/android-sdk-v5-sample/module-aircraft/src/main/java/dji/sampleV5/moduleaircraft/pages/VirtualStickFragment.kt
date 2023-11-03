@@ -1,16 +1,12 @@
 package dji.sampleV5.moduleaircraft.pages
 
-import android.Manifest
-import android.app.Activity
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import dji.sampleV5.moduleaircraft.R
@@ -20,7 +16,6 @@ import dji.sampleV5.moduleaircraft.models.SimulatorVM
 import dji.sampleV5.moduleaircraft.models.VirtualStickVM
 import dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystick
 import dji.sampleV5.moduleaircraft.virtualstick.OnScreenJoystickListener
-import dji.sampleV5.modulecommon.DJIMainActivity
 import dji.sampleV5.modulecommon.keyvalue.KeyValueDialogUtil
 import dji.sampleV5.modulecommon.models.LeicaControllerVM
 import dji.sampleV5.modulecommon.pages.DJIFragment
@@ -35,14 +30,14 @@ import dji.v5.manager.aircraft.virtualstick.Stick
 import dji.v5.utils.common.JsonUtil
 import dji.v5.utils.common.StringUtils
 import kotlinx.android.synthetic.main.frag_virtual_stick_page.*
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.security.Permission
+import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
-import dji.sampleV5.moduleaircraft.pages.VirtualStickFragment as VirtualStickFragment1
 
 
 /**
@@ -55,22 +50,19 @@ import dji.sampleV5.moduleaircraft.pages.VirtualStickFragment as VirtualStickFra
  */
 class VirtualStickFragment : DJIFragment() {
 
-    private val basicAircraftControlVM: BasicAircraftControlVM by activityViewModels()
+    val basicAircraftControlVM: BasicAircraftControlVM by activityViewModels()
     val virtualStickVM: VirtualStickVM by activityViewModels()
     private val simulatorVM: SimulatorVM by activityViewModels()
     private val deviation: Double = 0.02
     private val leicaCtlVM: LeicaControllerVM by viewModels()
-
+    lateinit var selfdrivevm: SelfDriveVM
     // TS data receiver
-    private var posData = mutableListOf<String>()
+    private var tsData = mutableListOf<String>()
+    private lateinit var prismPos :FloatArray
     // saver
     private val LeicaSaver = SaveList()
 
-    val REQUEST_EXTERNAL_STORAGE_CODE = 0x01
-    val mPermissions = arrayOf<String>(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,6 +75,7 @@ class VirtualStickFragment : DJIFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         widget_horizontal_situation_indicator.setSimpleModeEnable(false)
+        selfdrivevm = SelfDriveVM(virtualStickVM)
         initBtnClickListener()
         initStickListener()
 
@@ -92,21 +85,39 @@ class VirtualStickFragment : DJIFragment() {
         stopTSBtnListener()
         disconnectTSBtnListener()
 
+        // Button for Coordinate Calibration
+        setOriginBtnListener()
+        setXAxisBtnListener()
+        setZPosOffsetBtnListener()
+
         // Button for controlling Drone
         selfDriveStartBtnListener()
         selfDriveStopBtnListener()
+        selfDriveContinueBtnListener()
+        selfDriveResetBtnListener()
 
-        // Prism Position Data Observer
-        leicaCtlVM.prismPos.observe(viewLifecycleOwner) {
+
+
+        // Leica Data Observer
+        leicaCtlVM.leicaValue.observe(viewLifecycleOwner) {
+            // show TSValue on Screen
             tv_leicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
-            posData.add(it)
+
+            // set TS values for self Control
+            prismPos = extractFloatsFromInput(it)
+            selfdrivevm.setTSvaluePrefix(it.split(",")[0])
+            selfdrivevm.setTSPos(prismPos)
+                // show calibrated TSValue on Screen
+            tv_calibratedTSPos.text = StringUtils.getResStr(R.string.tv_calibratedLeicaPos, "${
+                it.split(",")[0]},${selfdrivevm.currDronePoint[0]},${selfdrivevm.currDronePoint[1]},${selfdrivevm.currDronePoint[2]}")
             // TS16で取得したデータを保存する
             //  リストをバッチ的に保存する
+            tsData.add(it)
             val saveBatchSize = 100
-            if(posData.size >= saveBatchSize){
-                val time = LeicaSaver.save(posData)
+            if(tsData.size >= saveBatchSize){
+                val time = LeicaSaver.save(tsData)
                 ToastUtils.showToast("FileSaveTime : $time ms")
-                posData.clear()
+                tsData.clear()
             }
         }
 
@@ -223,7 +234,7 @@ class VirtualStickFragment : DJIFragment() {
     }
 
     private fun selfDriveStartBtnListener() {
-        fun goStraight(p: Float, duration: Long){
+        /*fun goStraight(p: Float, duration: Long){
             println("Go Straight!!!")
             runBlocking {
                 // 右のvirtual stickを真っ直ぐに倒す ： 直進する
@@ -234,48 +245,39 @@ class VirtualStickFragment : DJIFragment() {
             }
             // 直進した後，スティックを中央に戻す
             virtualStickVM.setRightPosition(0, 0)
-        }
-        fun turnRight(p:Float, duration: Long) {
-            println("Turn Right!!!")
-            runBlocking {
-                // 左のvirtual stickを右に倒す：時計回りに回転
-                virtualStickVM.setLeftPosition(
-                    (p * Stick.MAX_STICK_POSITION_ABS).toInt(),
-                    0 )
-                delay(duration)
+        }*/
+
+//        val homeDir = Environment.getExternalStorageDirectory().absolutePath
+//        val savePath = "$homeDir/Download/testScenarioScript.txt"
+//        btn_selfDrive_start.setOnClickListener {
+//            selfdrivevm.setScenarioScript(savePath)
+//        }
+        btn_selfDrive_start.setOnClickListener {
+            val speed = 0.05
+            virtualStickVM.setSpeedLevel(speed)
+            ToastUtils.showToast("Set SpeedLevel $speed")
+            GlobalScope.launch{
+                val pos = floatArrayOf(0f, 0f, 1.0f)
+                val job = launch {
+                    selfdrivevm.moveTo(pos)
+                }
+                job.join()
+                Log.d("SelfDriveVM", "Moving Finish!!")
+                ToastUtils.showToast("Moving Finish!!")
             }
-            // 回転した後，スティックを中央に戻す
-            virtualStickVM.setLeftPosition(0, 0)
-        }
 
-        // Main Program is below
-        btn_selfDrive_start.setOnClickListener{
-            // start starting
-            println("Start!!")
-//            turnRight(1.0F, 1200) // p=1.0, d=1200 : Rotate about 90°
-            goStraight(0.05F, 1500)
-            runBlocking { delay(1000) }
-            turnRight(1.0F, 1200)
-            runBlocking { delay(1000) }
-            goStraight(0.05F, 1500)
-            runBlocking { delay(1000) }
-            turnRight(1.0F, 1200)
-            runBlocking { delay(1000) }
-            goStraight(0.05F, 1500)
-
-            println("Finish!!")
         }
     }
-    private fun selfDriveStopBtnListener(){
-        val selfdrivevm = SelfDriveVM(virtualStickVM)
-        val homeDir = Environment.getExternalStorageDirectory().absolutePath
-        val savePath = "$homeDir/testScenarioScript.txt"
-        btn_selfDrive_stop.setOnClickListener {
-            selfdrivevm.setScenarioScript(savePath)
-        }
-    }
-    private fun selfDriveContinueBtnListener(){}
-    private fun selfDriveResetBtnListener(){}
+    private fun selfDriveStopBtnListener(){btn_selfDrive_stop.setOnClickListener { selfdrivevm.stopMoving() }}
+    private fun selfDriveContinueBtnListener(){btn_selfDrive_continue.setOnClickListener {  }}
+    private fun selfDriveResetBtnListener(){btn_selfDrive_reset.setOnClickListener {  }}
+    private fun setOriginBtnListener(){bt_setOrigin.setOnClickListener { selfdrivevm.setOriginPos(prismPos)}}
+    private fun setXAxisBtnListener(){bt_setXAxis.setOnClickListener { selfdrivevm.setXAxisPos(prismPos) }}
+    private fun setZPosOffsetBtnListener(){bt_setZPosOffset.setOnClickListener { selfdrivevm.setZPosOffset(prismPos[2]) }}
+
+
+
+
 
     private fun connectTSBtnLintener() {
         bt_connectTS.setOnClickListener {
@@ -292,10 +294,11 @@ class VirtualStickFragment : DJIFragment() {
     // Start Reading
     private fun readTSBtnListener() {
         bt_readTS.setOnClickListener {
+            selfdrivevm.valueObserver.start()
             if(leicaCtlVM.mReceiveTask?.isAlive != true) {
                 leicaCtlVM.read()
             }
-            posData.clear()
+            tsData.clear()
             ToastUtils.showToast("Start Reading")
             //   保存するファイルパス
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
@@ -311,10 +314,10 @@ class VirtualStickFragment : DJIFragment() {
     private fun stopTSBtnListener() {
         bt_stopTS.setOnClickListener {
 //            leicaCtlVM.stop()
-            if (posData.size > 0){
-                LeicaSaver.save(posData)
-                ToastUtils.showToast("Saving Log Data...")
-                posData.clear()
+            if (tsData.size > 0){
+                val time = LeicaSaver.save(tsData)
+                ToastUtils.showToast("Saved Log Data in $time ms")
+                tsData.clear()
             }
             ToastUtils.showToast("Stop Reading")
         }
@@ -394,10 +397,34 @@ class VirtualStickFragment : DJIFragment() {
             virtual_stick_info_tv.text = builder.toString()
         }
     }
-
+///////////////// Util Functions ////////////////
     private fun getDate4filename() : String{
         val df: DateFormat = SimpleDateFormat("yyyyMMdd_HHmmss")
         val date: Date = Date(System.currentTimeMillis())
         return df.format(date)
+    }
+    private fun <T> getSubArray(array: Array<T>, beg: Int, end: Int): Array<T> {
+        return array.copyOfRange(beg, end + 1)
+    }
+    fun extractFloatsFromInput(input: String): FloatArray {
+        // カンマで文字列を分割
+        val parts = input.split(',').toTypedArray()
+        val points = getSubArray(parts, 1, 3)
+
+        // Floatの配列を初期化
+        val floatArray = FloatArray(points.size)
+
+        for (i in points.indices) {
+            try {
+                val floatValue = points[i].trim().toFloat()
+                floatArray[i] = floatValue
+            } catch (e: NumberFormatException) {
+                // 変換エラーが発生した場合の処理
+                // 何もしないか、エラーログを出力するなどの対処を行うことができます
+                e.printStackTrace()
+            }
+        }
+
+        return floatArray
     }
 }

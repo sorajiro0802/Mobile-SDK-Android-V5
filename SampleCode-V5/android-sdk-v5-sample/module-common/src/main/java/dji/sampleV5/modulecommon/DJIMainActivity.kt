@@ -167,7 +167,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             val filepath = "$saveDir/$filename"
             LeicaSaver.set(filepath)
         })
-        msdkInfoVm.leicaController.prismPos.observe(this, Observer {
+        msdkInfoVm.leicaController.leicaValue.observe(this, Observer {
             tvLeicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
             posData.add(it)
 
