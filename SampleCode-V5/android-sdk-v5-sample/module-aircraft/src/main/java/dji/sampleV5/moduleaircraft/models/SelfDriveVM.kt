@@ -1,19 +1,17 @@
 package dji.sampleV5.moduleaircraft.models
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import dji.sampleV5.modulecommon.models.DJIViewModel
 import dji.sampleV5.modulecommon.models.ValueUpdateObserver
-import dji.v5.common.callback.CommonCallbacks
-import dji.v5.common.error.IDJIError
+import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.manager.aircraft.virtualstick.Stick
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.lang.Thread.sleep
 import kotlin.math.*
-import kotlin.system.exitProcess
 
 class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private val TAG = "SelfDriveVM"
@@ -95,7 +93,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
         val x0 = calibOriginPos[0]; val y0 = calibOriginPos[1]  // TS Axes info
         val x1 = calibXAxisPos[0]; val y1 = calibXAxisPos[1]
 
-        val px = x1-x0; val py = y1-y0
+        val px = x1-x0
         val absP = calcL2Norm(calibOriginPos, calibXAxisPos)
 
         val theta = if (y1 > y0) {
