@@ -18,7 +18,7 @@ import kotlin.system.exitProcess
 class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private val TAG = "SelfDriveVM"
     private var isMoving = false
-    private var isArrived = false
+    private var movable = true
     private var calibOriginPos: FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     private var calibXAxisPos: FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     private var calibZOffsetPos: Float = .0f
@@ -43,35 +43,39 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
             // check Data stream from TS16 is alive
             observerFlag = valueObserver.getUpdatingStatus()
             while(observerFlag){
-                isMoving = true
-                // 到着したかどうかの判定
-                val pointsDiff = calcL2Norm(targetPos, currDronePoint)
-                if (tolerance > pointsDiff) {
-                    arriveCnt++
-                    if(arriveCnt > 10) {
-                        Log.d(TAG, "Arrived!")
-                        arriveCnt = 0
-                        break
+                if(movable) {
+                    isMoving = true
+                    // 到着したかどうかの判定
+                    val pointsDiff = calcL2Norm(targetPos, currDronePoint)
+                    if (tolerance > pointsDiff) {
+                        arriveCnt++
+                        if (arriveCnt > 10) {
+                            Log.d(TAG, "Arrived!")
+                            arriveCnt = 0
+                            break
+                        }
                     }
+                    // ドローンの操作を行う
+                    // 目的地と自分の場所の差分＝方向ベクトルを計算する
+                    val x_diff = targetPos[0] - currDronePoint[0]
+                    val y_diff = targetPos[1] - currDronePoint[1]
+                    val z_diff = targetPos[2] - currDronePoint[2]
+                    // 実際のドローン操作
+                    Log.d(TAG,"vertical(R):${x_diff / pointsDiff},horizon(R):${y_diff / pointsDiff},height:${(z_diff / pointsDiff)}")
+                    virtualStickVM.setRightPosition(
+                        ((y_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt(),
+                        ((x_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    )
+                    virtualStickVM.setLeftPosition(
+                        0,
+                        ((z_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    )
+                    sleep(100L)
+                    observerFlag = valueObserver.getUpdatingStatus()
+                } else {
+                    Log.d(TAG, "stop moving")
+                    continue
                 }
-
-                // ドローンの操作を行う
-                // 目的地と自分の場所の差分＝方向ベクトルを計算する
-                val x_diff = targetPos[0] - currDronePoint[0]
-                val y_diff = targetPos[1] - currDronePoint[1]
-                val z_diff = targetPos[2] - currDronePoint[2]
-
-                Log.d(TAG, "x:${x_diff/pointsDiff},y:${y_diff/pointsDiff},z:${(z_diff/pointsDiff)}")
-                virtualStickVM.setRightPosition(
-                    ((y_diff/pointsDiff) * Stick.MAX_STICK_POSITION_ABS/4).toInt(),
-                    ((x_diff/pointsDiff) * Stick.MAX_STICK_POSITION_ABS/4).toInt()
-                )
-                virtualStickVM.setLeftPosition(
-                    0,
-                    ((z_diff/pointsDiff) * Stick.MAX_STICK_POSITION_ABS/4).toInt()
-                )
-                sleep(100L)
-                observerFlag = valueObserver.getUpdatingStatus()
             }
 
             // reset stick values
