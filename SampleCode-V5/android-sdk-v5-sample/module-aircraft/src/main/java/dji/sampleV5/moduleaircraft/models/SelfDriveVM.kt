@@ -126,17 +126,15 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     }
 
     fun stopMoving() {
-        virtualStickVM.disableVirtualStick(object: CommonCallbacks.CompletionCallback{
-            override fun onSuccess() {
-                TODO("OK!!")
-            }
-
-            override fun onFailure(error: IDJIError) {
-                TODO("Ops!!")
-            }
-        })
+        movable = false
         isMoving = false
     }
+
+    fun continueMoving() {
+        movable = true
+        isMoving = true
+    }
+
     fun setScenarioScript(path:String){//TODO: ファイルアクセスがようわからんくて未完成,スタブ(scenarioPoints)でとりあえずは対応
         scenarioFile = File(path)
         try {
