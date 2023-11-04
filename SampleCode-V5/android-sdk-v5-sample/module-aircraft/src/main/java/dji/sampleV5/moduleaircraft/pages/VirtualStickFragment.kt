@@ -235,19 +235,7 @@ class VirtualStickFragment : DJIFragment() {
 
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
-            val speed = 0.05
-            virtualStickVM.setSpeedLevel(speed)
-            ToastUtils.showToast("Set SpeedLevel $speed")
-            GlobalScope.launch{
-                val pos = floatArrayOf(0f, 0f, 1.0f)
-                val job = launch {
-                    selfdrivevm.moveTo(pos)
-                }
-                job.join()
-                Log.d("SelfDriveVM", "Moving Finish!!")
-                ToastUtils.showToast("Moving Finish!!")
-            }
-
+            selfdrivevm.executeScript()
         }
     }
     private fun selfDriveStopBtnListener(){btn_selfDrive_stop.setOnClickListener { selfdrivevm.stopMoving() }}

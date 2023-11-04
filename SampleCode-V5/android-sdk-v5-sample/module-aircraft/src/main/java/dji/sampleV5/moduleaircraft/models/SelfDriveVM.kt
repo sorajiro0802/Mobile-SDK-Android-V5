@@ -7,6 +7,7 @@ import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.manager.aircraft.virtualstick.Stick
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -29,13 +30,33 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private var scenarioPoints: Array<FloatArray> = arrayOf(
         floatArrayOf(0.0f, 0.0f, 1.0f),
         floatArrayOf(1.0f, 0.0f, 1.0f),
-        floatArrayOf(1.0f, 2.0f, 1.0f)
+        floatArrayOf(1.0f, 2.0f, 1.0f),
+        floatArrayOf(0.0f, 2.0f, 1.0f),
+        floatArrayOf(0.0f, 0.0f, 1.0f),
     )
     private lateinit var scenarioFile: File
 
-    fun executeScript(){}
+    fun executeScript() {
+        // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．
+        val speed = 0.05
+        virtualStickVM.setSpeedLevel(speed)
+        GlobalScope.launch {
 
-    fun moveTo(targetPos: FloatArray){
+            for(i in scenarioPoints.indices) {
+                val pos = scenarioPoints[i]
+                val job = launch {
+                    moveTo(pos)
+                }
+                job.join()
+                runBlocking { sleep(2000L) }
+            }
+
+            Log.d("SelfDriveVM", "Moving Finish!!")
+            ToastUtils.showToast("Moving Finish!!")
+        }
+    }
+
+    private fun moveTo(targetPos: FloatArray){
         try {
             var arriveCnt = 0
             // check Data stream from TS16 is alive
@@ -49,6 +70,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                         arriveCnt++
                         if (arriveCnt > 10) {
                             Log.d(TAG, "Arrived!")
+                            ToastUtils.showToast("Arrived!")
                             arriveCnt = 0
                             break
                         }
@@ -58,24 +80,31 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     val x_diff = targetPos[0] - currDronePoint[0]
                     val y_diff = targetPos[1] - currDronePoint[1]
                     val z_diff = targetPos[2] - currDronePoint[2]
+
+                    var horizon = ((y_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    var vertical = ((x_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    var height = ((z_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
+                    if (pointsDiff <= .4f ) { // 40cm以内
+                        horizon = ((y_diff / pointsDiff) * 80).toInt()
+                        vertical = ((x_diff / pointsDiff) * 80).toInt()
+                        height = ((z_diff / pointsDiff) * 80).toInt()
+                    }
                     // 実際のドローン操作
-                    Log.d(TAG,"vertical(R):${x_diff / pointsDiff},horizon(R):${y_diff / pointsDiff},height:${(z_diff / pointsDiff)}")
-                    virtualStickVM.setRightPosition(
-                        ((y_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt(),
-                        ((x_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
-                    )
-                    virtualStickVM.setLeftPosition(
-                        0,
-                        ((z_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
-                    )
+                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
+                    virtualStickVM.setRightPosition(horizon, vertical)
+                    virtualStickVM.setLeftPosition(0, height)
+
                     sleep(100L)
                     observerFlag = valueObserver.getUpdatingStatus()
                 } else {
                     Log.d(TAG, "stop moving")
+                    // reset stick values
+                    virtualStickVM.setRightPosition(0,0)
+                    virtualStickVM.setLeftPosition(0,0)
                     continue
                 }
             }
-
             // reset stick values
             virtualStickVM.setRightPosition(0,0)
             virtualStickVM.setLeftPosition(0,0)
