@@ -24,7 +24,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private var currDronePoint:FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     val valueObserver: ValueUpdateObserver = ValueUpdateObserver()
     var observerFlag = true
-    private val tolerance = .05f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
+    private var tolerance = .05f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
 
 
     private var scenarioPoints: Array<FloatArray> = arrayOf(
@@ -153,6 +153,9 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     }
     fun setZPosOffset(zPos:Float) {
         calibZOffsetPos = zPos
+    }
+    fun setTargetTolerance(dist:Float){
+        tolerance = dist
     }
 
     fun stopMoving() {
