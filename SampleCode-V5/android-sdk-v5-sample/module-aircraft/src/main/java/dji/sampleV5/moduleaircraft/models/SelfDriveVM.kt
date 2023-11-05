@@ -77,18 +77,18 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     }
                     // ドローンの操作を行う
                     // 目的地と自分の場所の差分＝方向ベクトルを計算する
-                    val x_diff = targetPos[0] - currDronePoint[0]
-                    val y_diff = targetPos[1] - currDronePoint[1]
-                    val z_diff = targetPos[2] - currDronePoint[2]
+                    val xDiff = targetPos[0] - currDronePoint[0]
+                    val yDiff = targetPos[1] - currDronePoint[1]
+                    val zDiff = targetPos[2] - currDronePoint[2]
 
-                    var horizon = ((y_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
-                    var vertical = ((x_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
-                    var height = ((z_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    var horizon = ((yDiff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    var vertical = ((xDiff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    var height = ((zDiff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
                     // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
                     if (pointsDiff <= .3f ) { // 30cm以内
-                        horizon = ((y_diff / pointsDiff) * 80).toInt()
-                        vertical = ((x_diff / pointsDiff) * 80).toInt()
-                        height = ((z_diff / pointsDiff) * 80).toInt()
+                        horizon = ((yDiff / pointsDiff) * 80).toInt()
+                        vertical = ((xDiff / pointsDiff) * 80).toInt()
+                        height = ((zDiff / pointsDiff) * 80).toInt()
                     }
                     // 実際のドローン操作
                     Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
