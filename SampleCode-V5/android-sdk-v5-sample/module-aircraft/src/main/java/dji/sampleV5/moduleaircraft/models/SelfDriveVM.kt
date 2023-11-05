@@ -85,7 +85,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     var vertical = ((x_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
                     var height = ((z_diff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
                     // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
-                    if (pointsDiff <= .4f ) { // 40cm以内
+                    if (pointsDiff <= .3f ) { // 30cm以内
                         horizon = ((y_diff / pointsDiff) * 80).toInt()
                         vertical = ((x_diff / pointsDiff) * 80).toInt()
                         height = ((z_diff / pointsDiff) * 80).toInt()
@@ -99,22 +99,22 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     observerFlag = valueObserver.getUpdatingStatus()
                 } else {
                     Log.d(TAG, "stop moving")
-                    // reset stick values
-                    virtualStickVM.setRightPosition(0,0)
-                    virtualStickVM.setLeftPosition(0,0)
+                    resetStickPos()
                     continue
                 }
             }
             // reset stick values
-            virtualStickVM.setRightPosition(0,0)
-            virtualStickVM.setLeftPosition(0,0)
+            resetStickPos()
 
         }catch(e: Exception){
             Log.d(TAG, "$e")
-            // reset stick values
-            virtualStickVM.setRightPosition(0,0)
-            virtualStickVM.setLeftPosition(0,0)
+            resetStickPos()
         }
+    }
+
+    private fun resetStickPos() {
+        virtualStickVM.setRightPosition(0,0)
+        virtualStickVM.setLeftPosition(0,0)
     }
 
     private fun convertCoordinateTS2UAV(tsPos:FloatArray):FloatArray {
