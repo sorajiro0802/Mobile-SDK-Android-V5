@@ -235,6 +235,9 @@ class VirtualStickFragment : DJIFragment() {
 
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
+            // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．
+            val speed = 0.05
+            virtualStickVM.setSpeedLevel(speed)
             selfdrivevm.executeScript()
         }
     }

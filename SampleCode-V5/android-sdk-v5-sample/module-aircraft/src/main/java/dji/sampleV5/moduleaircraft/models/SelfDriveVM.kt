@@ -37,10 +37,8 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private lateinit var scenarioFile: File
 
     fun executeScript() {
-        // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．
-        val speed = 0.05
-        virtualStickVM.setSpeedLevel(speed)
-        GlobalScope.launch {
+        try {
+            t.launch {
 
             for(i in scenarioPoints.indices) {
                 val pos = scenarioPoints[i]
