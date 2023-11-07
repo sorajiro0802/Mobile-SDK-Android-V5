@@ -8,6 +8,7 @@ import dji.v5.manager.aircraft.virtualstick.Stick
 import kotlinx.coroutines.*
 import java.io.File
 import java.lang.Thread.sleep
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.*
 
 class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
@@ -55,8 +56,6 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                 } else {
                     Log.e(TAG, "Invalid Script Line")
                 }
-                job.join()
-                runBlocking { sleep(2000L) }
             }
 
             Log.d("SelfDriveVM", "Moving Finish!!")
@@ -67,7 +66,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private fun moveTo(targetPos: FloatArray){
         try {
             var arriveCnt = 0
-            // check Data stream from TS16 is alive
+            // check Data stream whether TS16 is alive
             observerFlag = valueObserver.getUpdatingStatus()
             while(observerFlag){
                 if(movable) {
