@@ -103,6 +103,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // save timesync log
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/Timesynchronisation Logs"
+            createFolderIfNotExists(saveDir)
             val filename = "timesyncLog_${getDate4filename()}_2.txt"
             val filepath = "$saveDir/$filename"
             timeSyncSaver.set(filepath)
@@ -163,6 +164,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             // for saving log
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/TS16Data"
+            createFolderIfNotExists(saveDir)
             val filename = "leicaPosLog_${getDate4filename()}.txt"
             val filepath = "$saveDir/$filename"
             LeicaSaver.set(filepath)
@@ -344,5 +346,20 @@ abstract class DJIMainActivity : AppCompatActivity() {
         val df: DateFormat = SimpleDateFormat("yyyyMMdd_HHmmss")
         val date: Date = Date(System.currentTimeMillis())
         return df.format(date)
+    }
+    fun createFolderIfNotExists(folderPath: String) {
+//        val externalStorageDir = Environment.getExternalStorageDirectory()
+        val folder = File(folderPath)
+
+        if (!folder.exists()) {
+            val success = folder.mkdirs()
+            if (success) {
+                // フォルダの作成に成功した場合の処理
+                println("フォルダ $folderPath を外部ストレージに作成しました")
+            } else {
+                // フォルダの作成に失敗した場合の処理
+                println("フォルダ $folderPath の作成に失敗しました")
+            }
+        }
     }
 }
