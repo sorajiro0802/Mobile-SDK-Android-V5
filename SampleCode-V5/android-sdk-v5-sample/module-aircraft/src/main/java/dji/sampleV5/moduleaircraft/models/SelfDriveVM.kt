@@ -5,12 +5,8 @@ import dji.sampleV5.modulecommon.models.DJIViewModel
 import dji.sampleV5.modulecommon.models.ValueUpdateObserver
 import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.manager.aircraft.virtualstick.Stick
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.io.File
-import java.io.FileInputStream
-import java.io.InputStreamReader
 import java.lang.Thread.sleep
 import kotlin.math.*
 
@@ -25,25 +21,39 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     val valueObserver: ValueUpdateObserver = ValueUpdateObserver()
     var observerFlag = true
     private var tolerance = .05f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
+    private val pjob = CoroutineScope(EmptyCoroutineContext)
+    private val defaultStickMax = 165
+    private val nearbyStickMax = 80
+    private val m = 50
 
-
-    private var scenarioPoints: Array<FloatArray> = arrayOf(
-        floatArrayOf(0.0f, 0.0f, 1.0f),
-        floatArrayOf(1.0f, 0.0f, 1.0f),
-        floatArrayOf(1.0f, 2.0f, 1.0f),
-        floatArrayOf(0.0f, 2.0f, 1.0f),
-        floatArrayOf(0.0f, 0.0f, 1.0f),
-    )
     private lateinit var scenarioFile: File
 
     fun executeScript() {
-        try {
-            t.launch {
+        pjob.launch {
+            scenarioFile.forEachLine{ line ->
+                // ファイルに書かれてる文字を上から読み順に解析していく
+                val parts = line.split(" ")
+                if (parts.size >= 2) {
+                    val command = parts[0]
+                    val args = parts.subList(1, parts.size).joinToString("")
 
-            for(i in scenarioPoints.indices) {
-                val pos = scenarioPoints[i]
-                val job = launch {
-                    moveTo(pos)
+                    // movコマンドの引数チェックと実行処理
+                    if(command.uppercase() == "MOV") {
+                        val pos = args.split(",").map {it.toFloat()}.toFloatArray()
+                        if(pos.size == 3) {
+                            Log.d(TAG, "MoveTo: ${pos[0]},${pos[1]},${pos[2]}")
+                            moveTo(pos)
+                        } else { Log.e(TAG, "Invalid PosArgument length: ${pos.size}") }
+                    }
+                    // waitコマンドの引数チェックと実行処理
+                    else if(command.uppercase() == "WAIT") {
+                        val sleepTime = args.toLong()
+                        Log.d(TAG, "Wait: $sleepTime mmSec")
+                        runBlocking { delay(sleepTime) }
+                    } else {Log.e(TAG, "Non Expected Command:$command")}
+
+                } else {
+                    Log.e(TAG, "Invalid Script Line")
                 }
                 job.join()
                 runBlocking { sleep(2000L) }
@@ -72,31 +82,44 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                             arriveCnt = 0
                             break
                         }
+                    } else {
+                        arriveCnt = 0
                     }
                     // ドローンの操作を行う
-                    // 目的地と自分の場所の差分＝方向ベクトルを計算する
+                    // 目的地Pos-自分のPos ＝ 方向ベクトル を計算する
                     val xDiff = targetPos[0] - currDronePoint[0]
                     val yDiff = targetPos[1] - currDronePoint[1]
                     val zDiff = targetPos[2] - currDronePoint[2]
 
-                    var horizon = ((yDiff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
-                    var vertical = ((xDiff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
-                    var height = ((zDiff / pointsDiff) * Stick.MAX_STICK_POSITION_ABS / 4).toInt()
+                    // 方向ベクトルの各成分の単位ベクトルを元に移動
+                    var horizon = 0
+                    var vertical = 0
+                    var height = 0
                     // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
-                    if (pointsDiff <= .3f ) { // 30cm以内
-                        horizon = ((yDiff / pointsDiff) * 80).toInt()
-                        vertical = ((xDiff / pointsDiff) * 80).toInt()
-                        height = ((zDiff / pointsDiff) * 80).toInt()
+                    if (.45f < pointsDiff){
+                        horizon = ((yDiff / pointsDiff) * defaultStickMax).toInt()
+                        vertical = ((xDiff / pointsDiff) * defaultStickMax).toInt()
+                        height = ((zDiff / pointsDiff) * defaultStickMax).toInt()
                     }
+                    else if (.15f <= pointsDiff && pointsDiff <= .45f ) { // 45cm以内
+                        horizon = ((yDiff / pointsDiff) * nearbyStickMax).toInt()
+                        vertical = ((xDiff / pointsDiff) * nearbyStickMax).toInt()
+                        height = ((zDiff / pointsDiff) * nearbyStickMax).toInt()
+                    }else{ // 15cm以内
+                        horizon = ((yDiff / pointsDiff) * m).toInt()
+                        vertical = ((xDiff / pointsDiff) * m).toInt()
+                        height = ((zDiff / pointsDiff) * m).toInt()
+                    }
+
                     // 実際のドローン操作
-                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
+//                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
                     virtualStickVM.setRightPosition(horizon, vertical)
                     virtualStickVM.setLeftPosition(0, height)
 
                     sleep(100L)
                     observerFlag = valueObserver.getUpdatingStatus()
                 } else {
-                    Log.d(TAG, "stop moving")
+//                    Log.d(TAG, "stop moving")
                     resetStickPos()
                     continue
                 }
@@ -166,17 +189,24 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
         isMoving = true
     }
 
-    fun setScenarioScript(path:String){//TODO: ファイルアクセスがようわからんくて未完成,スタブ(scenarioPoints)でとりあえずは対応
-        scenarioFile = File(path)
+    fun resetMoving() {
         try {
-            val inputStream: FileInputStream = FileInputStream(scenarioFile)
-            val reader: InputStreamReader = InputStreamReader(inputStream)
-            Log.d("ReadScenario", reader.readText())
-
-            inputStream.close()
-            reader.close()
+            pjob.cancel()
+            resetStickPos()
+            Log.d(TAG, "Moving was resettle")
         } catch(e: Exception) {
-            Log.e("ReadScenario", e.toString())
+            Log.e(TAG, "$e")
+            ToastUtils.showToast("$e")
+        }
+    }
+
+    fun setScenarioScript(path:String){
+        try {
+            scenarioFile = File(path)
+            ToastUtils.showToast("Script was Settled")
+        } catch(e: Exception) {
+            Log.e(TAG, e.toString())
+            ToastUtils.showToast("Failed to load")
         }
     }
     fun getScenarioScript(): File {

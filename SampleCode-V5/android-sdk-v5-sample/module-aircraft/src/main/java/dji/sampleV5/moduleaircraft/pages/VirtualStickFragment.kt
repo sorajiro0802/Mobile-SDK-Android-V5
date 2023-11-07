@@ -231,6 +231,10 @@ class VirtualStickFragment : DJIFragment() {
 
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
+            val homeDir = Environment.getExternalStorageDirectory().absolutePath
+            val filename = "scenario_2023-11-07.txt"
+            val scriptPath = "$homeDir/$filename"
+            selfdrivevm.setScenarioScript(scriptPath)
             // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．
             val speed = 0.05
             virtualStickVM.setSpeedLevel(speed)
@@ -239,7 +243,7 @@ class VirtualStickFragment : DJIFragment() {
     }
     private fun selfDriveStopBtnListener(){btn_selfDrive_stop.setOnClickListener { selfdrivevm.stopMoving() }}
     private fun selfDriveContinueBtnListener(){btn_selfDrive_continue.setOnClickListener { selfdrivevm.continueMoving() }}
-    private fun selfDriveResetBtnListener(){btn_selfDrive_reset.setOnClickListener {  }}
+    private fun selfDriveResetBtnListener(){btn_selfDrive_reset.setOnClickListener { selfdrivevm.resetMoving() }}
     private fun setOriginBtnListener(){bt_setOrigin.setOnClickListener { selfdrivevm.setOriginPos(prismPos)}}
     private fun setXAxisBtnListener(){bt_setXAxis.setOnClickListener { selfdrivevm.setXAxisPos(prismPos) }}
     private fun setZPosOffsetBtnListener(){bt_setZPosOffset.setOnClickListener { selfdrivevm.setZPosOffset(prismPos[2]) }}
