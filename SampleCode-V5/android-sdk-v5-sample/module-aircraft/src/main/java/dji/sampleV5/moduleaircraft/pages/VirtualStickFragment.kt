@@ -109,7 +109,7 @@ class VirtualStickFragment : DJIFragment() {
             tv_calibratedTSPos.text = StringUtils.getResStr(R.string.tv_calibratedLeicaPos, "${it.split(",")[0]},${curDronePos[0]},${curDronePos[1]},${curDronePos[2]}")
             // TS16で取得したデータを保存する
             //  リストをバッチ的に保存する
-            tsData.add(it)
+            tsData.add("$it,${getNowDate()}")
             val saveBatchSize = 100
             if(tsData.size >= saveBatchSize){
                 val time = LeicaSaver.save(tsData)
@@ -251,8 +251,6 @@ class VirtualStickFragment : DJIFragment() {
 
 
 
-
-
     private fun connectTSBtnLintener() {
         bt_connectTS.setOnClickListener {
                 if(leicaCtlVM.connect() == 0) {
@@ -277,6 +275,7 @@ class VirtualStickFragment : DJIFragment() {
             //   保存するファイルパス
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/TS16Data"
+            createFolderIfNotExists(saveDir)
             //  EditTextから保存ファイル名を取得する
             val filename = "leicaPosLog_${getDate4filename()}.txt"
             val filepath = "$saveDir/$filename"
@@ -405,5 +404,21 @@ class VirtualStickFragment : DJIFragment() {
         val df: DateFormat = SimpleDateFormat("HH:mm:ss.SSS")
         val date: Date = Date(System.currentTimeMillis())
         return df.format(date)
+    }
+
+    fun createFolderIfNotExists(folderPath: String) {
+//        val externalStorageDir = Environment.getExternalStorageDirectory()
+        val folder = File(folderPath)
+
+        if (!folder.exists()) {
+            val success = folder.mkdirs()
+            if (success) {
+                // フォルダの作成に成功した場合の処理
+                println("フォルダ $folderPath を外部ストレージに作成しました")
+            } else {
+                // フォルダの作成に失敗した場合の処理
+                println("フォルダ $folderPath の作成に失敗しました")
+            }
+        }
     }
 }
