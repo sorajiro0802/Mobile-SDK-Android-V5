@@ -30,10 +30,6 @@ import dji.v5.manager.aircraft.virtualstick.Stick
 import dji.v5.utils.common.JsonUtil
 import dji.v5.utils.common.StringUtils
 import kotlinx.android.synthetic.main.frag_virtual_stick_page.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -399,5 +395,10 @@ class VirtualStickFragment : DJIFragment() {
         }
 
         return floatArray
+    }
+    fun getNowDate(): String {
+        val df: DateFormat = SimpleDateFormat("HH:mm:ss.SSS")
+        val date: Date = Date(System.currentTimeMillis())
+        return df.format(date)
     }
 }
