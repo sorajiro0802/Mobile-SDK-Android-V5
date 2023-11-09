@@ -111,7 +111,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     }
 
                     // 実際のドローン操作
-                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
+//                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
                     virtualStickVM.setRightPosition(horizon, vertical)
                     virtualStickVM.setLeftPosition(0, height)
 
