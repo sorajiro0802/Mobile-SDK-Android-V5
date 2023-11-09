@@ -96,22 +96,22 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     var height = 0
                     // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
                     if (.45f < pointsDiff){
-                        horizon = ((yDiff / pointsDiff) * defaultStickMax).toInt()
-                        vertical = ((xDiff / pointsDiff) * defaultStickMax).toInt()
+                        horizon = ((xDiff / pointsDiff) * defaultStickMax).toInt()
+                        vertical = ((yDiff / pointsDiff) * defaultStickMax).toInt()
                         height = ((zDiff / pointsDiff) * defaultStickMax).toInt()
                     }
                     else if (.15f <= pointsDiff && pointsDiff <= .45f ) { // 45cm以内
-                        horizon = ((yDiff / pointsDiff) * nearbyStickMax).toInt()
-                        vertical = ((xDiff / pointsDiff) * nearbyStickMax).toInt()
+                        horizon = ((xDiff / pointsDiff) * nearbyStickMax).toInt()
+                        vertical = ((yDiff / pointsDiff) * nearbyStickMax).toInt()
                         height = ((zDiff / pointsDiff) * nearbyStickMax).toInt()
                     }else{ // 15cm以内
-                        horizon = ((yDiff / pointsDiff) * m).toInt()
-                        vertical = ((xDiff / pointsDiff) * m).toInt()
+                        horizon = ((xDiff / pointsDiff) * m).toInt()
+                        vertical = ((yDiff / pointsDiff) * m).toInt()
                         height = ((zDiff / pointsDiff) * m).toInt()
                     }
 
                     // 実際のドローン操作
-//                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
+                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
                     virtualStickVM.setRightPosition(horizon, vertical)
                     virtualStickVM.setLeftPosition(0, height)
 
@@ -140,10 +140,9 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private fun convertCoordinateTS2UAV(tsPos:FloatArray):FloatArray {
         val convertedPos = floatArrayOf(.0f, .0f, .0f)
         // index  0:x, 1:y, 2:z
-        val x = tsPos[0]; val y = tsPos[1]; val z = tsPos[2] // arbitrary Point for convert
-
-        val x0 = calibOriginPos[0]; val y0 = calibOriginPos[1]  // TS Axes info
-        val x1 = calibXAxisPos[0]; val y1 = calibXAxisPos[1]
+        val x = -tsPos[0]; val y = tsPos[1]; val z = tsPos[2] // arbitrary Point for convert
+        val x0 = -calibOriginPos[0]; val y0 = calibOriginPos[1]  // TS Axes info
+        val x1 = -calibXAxisPos[0]; val y1 = calibXAxisPos[1]
 
         val px = x1-x0
         val absP = calcL2Norm(calibOriginPos, calibXAxisPos)
