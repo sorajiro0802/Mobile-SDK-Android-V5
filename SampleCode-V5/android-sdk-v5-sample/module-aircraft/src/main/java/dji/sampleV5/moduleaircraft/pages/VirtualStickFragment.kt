@@ -266,7 +266,9 @@ class VirtualStickFragment : DJIFragment() {
     // Start Reading
     private fun readTSBtnListener() {
         bt_readTS.setOnClickListener {
-            selfdrivevm.valueObserver.start()
+            if(!selfdrivevm.valueObserver.isAlive){
+                selfdrivevm.valueObserver.start()
+            }
             if(leicaCtlVM.mReceiveTask?.isAlive != true) {
                 leicaCtlVM.read()
             }
