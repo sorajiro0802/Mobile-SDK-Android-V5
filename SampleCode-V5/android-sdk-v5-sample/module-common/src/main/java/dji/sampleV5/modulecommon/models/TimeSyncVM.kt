@@ -1,7 +1,9 @@
 package dji.sampleV5.modulecommon.models
 
+import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import dji.sampleV5.modulecommon.util.SaveList
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -27,20 +29,35 @@ class TimeSyncVM() : DJIViewModel() {
         var stop_flag = false
         private lateinit var socket: DatagramSocket
 
+        var sendTimeLog = mutableListOf<String>()
+        var saver = SaveList()
+        var cnt = 0
+        val homeDir = Environment.getExternalStorageDirectory().absolutePath
+        val saveDir = "$homeDir/Timesynchronisation Logs"
+        val filename = "timesyncLog_${getDate4filename()}_1.txt"
+        val filepath = "$saveDir/$filename"
+
         override fun run(){
             this.read()
         }
 
         private fun read(){
+            // save timesync log
+            saver.set(filepath)
+            sendTimeLog.add("ClientTimeSend")
+            // for reading
             socket = DatagramSocket(port)
             while (!stop_flag) {
+                sendTimeLog.add("$cnt,${getNowDate()}")
+                cnt++
                 send("send")
+
                 sleep(SLEEP_TIME)
-                recieve()
+                receive()
             }
         }
 
-        private fun recieve(){
+        private fun receive(){
             val buffer: ByteArray = ByteArray(24)
             val packet: DatagramPacket = DatagramPacket(buffer, buffer.size)
 
@@ -66,16 +83,27 @@ class TimeSyncVM() : DJIViewModel() {
 
         fun close(){
             try {
+                // save list
+                saver.save(sendTimeLog)
+                cnt = 0
+                sendTimeLog.clear()
+
                 socket.close()
             } catch(e: Exception) {
                 Log.e(TAG, "Could not close UDP Socket")
             }
         }
 
+        private fun getDate4filename() : String{
+            val df: DateFormat = SimpleDateFormat("yyyyMMdd_HHmmss")
+            val date: Date = Date(System.currentTimeMillis())
+            return df.format(date)
+        }
+
     }
 
     fun getNowDate(): String {
-        val df: DateFormat = SimpleDateFormat("yyyy/MM/dd,HH:mm:ss.SSS")
+        val df: DateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS")
         val date: Date = Date(System.currentTimeMillis())
         return df.format(date)
     }

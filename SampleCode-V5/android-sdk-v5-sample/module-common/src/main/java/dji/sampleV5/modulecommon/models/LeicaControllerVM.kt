@@ -9,13 +9,14 @@ class LeicaControllerVM() : DJIViewModel(){
     private val TAG = "LeicaControllerVM"
     private var connection = false
     private val macAddr: String = "D4:36:39:77:DC:92" // MacAddress of Total Station Leica TS16
+    val isDataComing : MutableLiveData<Boolean> = MutableLiveData<Boolean>()
 
     var btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
     var btDevice: BluetoothDevice = btAdapter!!.getRemoteDevice(this.macAddr)
     // check below
     private var connectThread: BluetoothConnectThread = SerialPortProfileConnectThread(btDevice)
     var mReceiveTask: BluetoothReceiveTask? = null
-    var prismPos: MutableLiveData<String> = MutableLiveData<String>()
+    var leicaValue: MutableLiveData<String> = MutableLiveData<String>()
 
     init {
 //        this.connect()
@@ -47,7 +48,7 @@ class LeicaControllerVM() : DJIViewModel(){
 
     fun read() {
         if(this.connection) {
-            mReceiveTask!!.receiveData = prismPos
+            mReceiveTask!!.receiveData = leicaValue
             mReceiveTask!!.start()
         } else {
             Log.e(TAG, "Leica is not connected")
@@ -56,7 +57,7 @@ class LeicaControllerVM() : DJIViewModel(){
     fun stop(){
 
         try {
-            prismPos.postValue("")
+//            prismPos.postValue("")
         } catch (e: InterruptedException){
             e.printStackTrace()
         }
