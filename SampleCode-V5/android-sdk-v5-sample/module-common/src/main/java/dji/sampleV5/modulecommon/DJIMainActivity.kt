@@ -13,15 +13,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-<<<<<<< HEAD
 import androidx.lifecycle.Observer
 import dji.sampleV5.modulecommon.models.*
-=======
-import dji.sampleV5.modulecommon.models.BaseMainActivityVm
-import dji.sampleV5.modulecommon.models.MSDKInfoVm
-import dji.sampleV5.modulecommon.models.MSDKManagerVM
-import dji.sampleV5.modulecommon.models.globalViewModels
->>>>>>> c4430a68b34bef62f5b8c6ecea1ebc9915f524f7
 import dji.sampleV5.modulecommon.util.Helper
 import dji.sampleV5.modulecommon.util.ToastUtils
 import dji.v5.utils.common.LogUtils
