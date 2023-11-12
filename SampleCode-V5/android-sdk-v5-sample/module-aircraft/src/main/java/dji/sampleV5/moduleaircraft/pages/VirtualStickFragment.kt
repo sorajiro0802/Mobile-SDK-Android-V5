@@ -1,12 +1,13 @@
 package dji.sampleV5.moduleaircraft.pages
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Environment
+import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import dji.sampleV5.moduleaircraft.R
@@ -55,7 +56,11 @@ class VirtualStickFragment : DJIFragment() {
     lateinit var selfdrivevm: SelfDriveVM
     // TS data receiver
     private var tsData = mutableListOf<String>()
-    private lateinit var prismPos :FloatArray
+    private var prismPos :FloatArray = floatArrayOf(0f,0f,0f)
+    lateinit var pref: SharedPreferences
+    private val originKey = "origin"
+    private val xAxisKey = "xAxis"
+    private val zPosKey = "zPos"
     // saver
     private val LeicaSaver = SaveList()
 
@@ -86,6 +91,9 @@ class VirtualStickFragment : DJIFragment() {
         setOriginBtnListener()
         setXAxisBtnListener()
         setZPosOffsetBtnListener()
+        // Coordinate Info Ini files
+        pref = PreferenceManager.getDefaultSharedPreferences(this.context)
+        initPrevCalibPos(pref)
 
         // Button for controlling Drone
         selfDriveStartBtnListener()
@@ -245,9 +253,19 @@ class VirtualStickFragment : DJIFragment() {
     private fun selfDriveStopBtnListener(){btn_selfDrive_stop.setOnClickListener { selfdrivevm.stopMoving() }}
     private fun selfDriveContinueBtnListener(){btn_selfDrive_continue.setOnClickListener { selfdrivevm.continueMoving() }}
     private fun selfDriveResetBtnListener(){btn_selfDrive_reset.setOnClickListener { selfdrivevm.resetMoving() }}
-    private fun setOriginBtnListener(){bt_setOrigin.setOnClickListener { selfdrivevm.setOriginPos(prismPos)}}
-    private fun setXAxisBtnListener(){bt_setXAxis.setOnClickListener { selfdrivevm.setXAxisPos(prismPos) }}
-    private fun setZPosOffsetBtnListener(){bt_setZPosOffset.setOnClickListener { selfdrivevm.setZPosOffset(prismPos[2]) }}
+
+    private fun setOriginBtnListener(){bt_setOrigin.setOnClickListener {
+        selfdrivevm.setOriginPos(prismPos)
+        writePreferences(originKey, prismPos.contentToString())
+    }}
+    private fun setXAxisBtnListener(){bt_setXAxis.setOnClickListener {
+        selfdrivevm.setXAxisPos(prismPos)
+        writePreferences(xAxisKey, prismPos.contentToString())
+    }}
+    private fun setZPosOffsetBtnListener(){bt_setZPosOffset.setOnClickListener {
+        selfdrivevm.setZPosOffset(prismPos[2])
+        writePreferences(zPosKey, prismPos[2].toString())
+    }}
 
 
 
@@ -305,6 +323,17 @@ class VirtualStickFragment : DJIFragment() {
             ToastUtils.showToast("Disconnect")
 
             }
+    }
+
+    private fun initPrevCalibPos(sPref: SharedPreferences){
+        // 前回のドローン座標系キャリブレーション情報を抜き出す
+        val originPos = sPref.getString(originKey, "[0,0,0]").toString().replace("[","").replace("]", "").split(",").map{it.toFloat()}.toFloatArray()
+        val xAxisPos = sPref.getString(xAxisKey, "[0,0,0]").toString().replace("[","").replace("]", "").split(",").map{it.toFloat()}.toFloatArray()
+        val zPos = sPref.getString(zPosKey, "0")!!.toFloat()
+        selfdrivevm.setOriginPos(originPos)
+        selfdrivevm.setXAxisPos(xAxisPos)
+        selfdrivevm.setZPosOffset(zPos)
+        Log.d("INI_FILE", "${originPos.contentToString()},${xAxisPos.contentToString()},${zPos.toString()}")
     }
 
 
@@ -423,4 +452,12 @@ class VirtualStickFragment : DJIFragment() {
             }
         }
     }
+    fun writePreferences(dataKey: String, saveData: String) {
+        //エディターで値を書き込む
+        val prefEditor: SharedPreferences.Editor = pref.edit()
+        prefEditor.putString(dataKey, saveData)
+        prefEditor.apply()
+        //変更内容を反映
+    }
+
 }
