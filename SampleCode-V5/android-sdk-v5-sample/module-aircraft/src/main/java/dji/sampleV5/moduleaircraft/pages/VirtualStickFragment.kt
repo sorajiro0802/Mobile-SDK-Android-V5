@@ -246,7 +246,7 @@ class VirtualStickFragment : DJIFragment() {
             createFolderIfNotExists(saveDir)
             val scriptPath = "$saveDir/$filename"
             selfdrivevm.setScenarioScript(scriptPath)
-            // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．
+            // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．(水平・垂直最大： 50cm/s, 上下最大： 15cm/s)
             val speed = 0.05
             virtualStickVM.setSpeedLevel(speed)
             selfdrivevm.executeScript()
