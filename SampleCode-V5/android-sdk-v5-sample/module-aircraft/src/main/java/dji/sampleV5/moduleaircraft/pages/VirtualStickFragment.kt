@@ -241,8 +241,10 @@ class VirtualStickFragment : DJIFragment() {
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
-            val filename = "scenario_2023-11-07.txt"
-            val scriptPath = "$homeDir/$filename"
+            val filename = "scenarioScript_nonStop.txt"
+            val saveDir = "$homeDir/Scripts"
+            createFolderIfNotExists(saveDir)
+            val scriptPath = "$saveDir/$filename"
             selfdrivevm.setScenarioScript(scriptPath)
             // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．
             val speed = 0.05
