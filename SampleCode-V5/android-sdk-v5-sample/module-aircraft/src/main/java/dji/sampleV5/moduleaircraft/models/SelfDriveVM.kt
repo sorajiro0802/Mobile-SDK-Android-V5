@@ -89,6 +89,9 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     val xDiff = targetPos[0] - currDronePoint[0]
                     val yDiff = targetPos[1] - currDronePoint[1]
                     val zDiff = targetPos[2] - currDronePoint[2]
+                    val exDiff = xDiff/pointsDiff
+                    val eyDiff = yDiff/pointsDiff
+                    val ezDiff = zDiff/pointsDiff
 
                     // 方向ベクトルの各成分の単位ベクトルを元に移動
                     var horizon = 0
@@ -96,18 +99,18 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     var height = 0
                     // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
                     if (.45f < pointsDiff){
-                        horizon = ((xDiff / pointsDiff) * defaultStickMax).toInt()
-                        vertical = ((yDiff / pointsDiff) * defaultStickMax).toInt()
-                        height = ((zDiff / pointsDiff) * defaultStickMax).toInt()
+                        horizon = (exDiff * defaultStickMax).toInt()
+                        vertical = (eyDiff * defaultStickMax).toInt()
+                        height = (ezDiff * defaultStickMax).toInt()
                     }
                     else if (.15f <= pointsDiff && pointsDiff <= .45f ) { // 45cm以内
-                        horizon = ((xDiff / pointsDiff) * nearbyStickMax).toInt()
-                        vertical = ((yDiff / pointsDiff) * nearbyStickMax).toInt()
-                        height = ((zDiff / pointsDiff) * nearbyStickMax).toInt()
+                        horizon = (exDiff * nearbyStickMax).toInt()
+                        vertical = (eyDiff * nearbyStickMax).toInt()
+                        height = (ezDiff * nearbyStickMax).toInt()
                     }else{ // 15cm以内
-                        horizon = ((xDiff / pointsDiff) * m).toInt()
-                        vertical = ((yDiff / pointsDiff) * m).toInt()
-                        height = ((zDiff / pointsDiff) * m).toInt()
+                        horizon = (exDiff * m).toInt()
+                        vertical = (eyDiff * m).toInt()
+                        height = (ezDiff * m).toInt()
                     }
 
                     // 実際のドローン操作
