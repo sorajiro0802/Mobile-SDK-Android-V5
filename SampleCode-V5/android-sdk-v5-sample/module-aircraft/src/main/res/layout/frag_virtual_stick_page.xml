@@ -193,6 +193,14 @@
         app:layout_constraintStart_toStartOf="@+id/bt_setXAxis"
         app:layout_constraintTop_toBottomOf="@+id/bt_setXAxis" />
 
+    <Spinner
+        android:id="@+id/sp_choose_script"
+        android:layout_width="96dp"
+        android:layout_height="41dp"
+        app:layout_constraintEnd_toEndOf="@+id/bt_setZPosOffset"
+        app:layout_constraintStart_toStartOf="@+id/bt_setZPosOffset"
+        app:layout_constraintTop_toBottomOf="@+id/bt_setZPosOffset" />
+
     <TextView
         android:id="@+id/tv_selfControl"
         android:layout_width="wrap_content"

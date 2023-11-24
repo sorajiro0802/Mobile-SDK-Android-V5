@@ -1,5 +1,6 @@
 package dji.sampleV5.moduleaircraft.pages
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Environment
@@ -8,6 +9,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import dji.sampleV5.moduleaircraft.R
@@ -63,6 +66,11 @@ class VirtualStickFragment : DJIFragment() {
     private val zPosKey = "zPos"
     // saver
     private val LeicaSaver = SaveList()
+    val homeDir = Environment.getExternalStorageDirectory().absolutePath
+    // シナリオスクリプトを置いておくフォルダ
+    val scriptDir = "$homeDir/Scripts"
+    var scriptFile = ""
+
 
 
 
@@ -94,7 +102,8 @@ class VirtualStickFragment : DJIFragment() {
         // Coordinate Info Ini files
         pref = PreferenceManager.getDefaultSharedPreferences(this.context)
         initPrevCalibPos(pref)
-
+        // select script file
+        context?.let { initScriptSpinner(it) }
         // Button for controlling Drone
         selfDriveStartBtnListener()
         selfDriveStopBtnListener()
@@ -237,14 +246,27 @@ class VirtualStickFragment : DJIFragment() {
             virtualStickVM.disableVirtualStickAdvancedMode()
         }
     }
+    private fun initScriptSpinner(context: Context) {
+        // スクリプト選択スピナーの指定
+        val adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // スクリプト格納フォルダが無ければ作成する
+        createFolderIfNotExists(scriptDir)
+        val dir = File(scriptDir)
+        val list = dir.listFiles()
+        // ファイルのみ追加する
+        list?.forEach {
+            // 絶対パスが返ってくるためファイル名のみを切り出す
+            if (it.isFile) adapter.add(it.toString().split("/").last())
+        }
+        val scriptSpinner: Spinner = sp_choose_script
+        scriptSpinner.adapter = adapter
+    }
 
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
-            val homeDir = Environment.getExternalStorageDirectory().absolutePath
-            val filename = "scenarioScript_nonStop.txt"
-            val saveDir = "$homeDir/Scripts"
-            createFolderIfNotExists(saveDir)
-            val scriptPath = "$saveDir/$filename"
+            scriptFile = sp_choose_script.selectedItem.toString()
+            val scriptPath = "$scriptDir/$scriptFile"
             selfdrivevm.setScenarioScript(scriptPath)
             // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．(水平・垂直最大： 50cm/s, 上下最大： 15cm/s)
             val speed = 0.05
@@ -295,7 +317,6 @@ class VirtualStickFragment : DJIFragment() {
             tsData.clear()
             ToastUtils.showToast("Start Reading")
             //   保存するファイルパス
-            val homeDir = Environment.getExternalStorageDirectory().absolutePath
             val saveDir = "$homeDir/TS16Data"
             createFolderIfNotExists(saveDir)
             //  EditTextから保存ファイル名を取得する
