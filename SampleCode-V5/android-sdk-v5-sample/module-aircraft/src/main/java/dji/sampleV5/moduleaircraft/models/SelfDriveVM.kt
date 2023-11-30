@@ -21,11 +21,10 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private var currDronePoint:FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     val valueObserver: ValueUpdateObserver = ValueUpdateObserver()
     var observerFlag = true
-    private var tolerance = .05f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
+    private var tolerance = .02f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
     private val pjob = CoroutineScope(EmptyCoroutineContext)
-    private val defaultStickMax = 165
-    private val nearbyStickMax = 80
-    private val m = 50
+    private val defaultStickMax = 165 // 125 mm/s
+    private val nearbyStickMax = 39.6 // 30 mm/s
 
     private lateinit var scenarioFile: File
 
@@ -101,16 +100,16 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     if (.45f < pointsDiff){
                         horizon = (exDiff * defaultStickMax).toInt()
                         vertical = (eyDiff * defaultStickMax).toInt()
-                        height = (ezDiff * defaultStickMax).toInt()
+                        height = (ezDiff * defaultStickMax * 10/3).toInt()
                     }
-                    else if (.15f <= pointsDiff && pointsDiff <= .45f ) { // 45cm以内
+                    else if (pointsDiff in .15f .. .45f) { // 45cm以内
+                        horizon = (exDiff * ((defaultStickMax-nearbyStickMax)/.30*pointsDiff-28.1)).toInt()
+                        vertical = (eyDiff * ((defaultStickMax-nearbyStickMax)/.30*pointsDiff)-28.1).toInt()
+                        height = (ezDiff * ((defaultStickMax-nearbyStickMax)/.30*pointsDiff-28.1)*10/3 ).toInt()
+                    }else{ // 15cm以内
                         horizon = (exDiff * nearbyStickMax).toInt()
                         vertical = (eyDiff * nearbyStickMax).toInt()
-                        height = (ezDiff * nearbyStickMax).toInt()
-                    }else{ // 15cm以内
-                        horizon = (exDiff * m).toInt()
-                        vertical = (eyDiff * m).toInt()
-                        height = (ezDiff * m).toInt()
+                        height = (ezDiff * nearbyStickMax * 10/3).toInt()
                     }
 
                     // 実際のドローン操作
@@ -202,9 +201,10 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     }
 
     fun setScenarioScript(path:String){
+        val filename = path.split("/").last()
         try {
             scenarioFile = File(path)
-            ToastUtils.showToast("Script was Settled")
+            ToastUtils.showToast("[$filename] was Settled")
         } catch(e: Exception) {
             Log.e(TAG, e.toString())
             ToastUtils.showToast("Failed to load")
