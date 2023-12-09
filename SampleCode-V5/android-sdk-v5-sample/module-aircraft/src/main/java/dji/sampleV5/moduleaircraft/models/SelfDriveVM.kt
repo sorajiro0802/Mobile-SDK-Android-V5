@@ -4,7 +4,6 @@ import android.util.Log
 import dji.sampleV5.modulecommon.models.DJIViewModel
 import dji.sampleV5.modulecommon.models.ValueUpdateObserver
 import dji.sampleV5.modulecommon.util.ToastUtils
-import dji.v5.manager.aircraft.virtualstick.Stick
 import kotlinx.coroutines.*
 import java.io.File
 import java.lang.Thread.sleep
@@ -97,19 +96,17 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     var vertical = 0
                     var height = 0
                     // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
-                    if (.45f < pointsDiff){
+                    if (.212f < pointsDiff){
                         horizon = (exDiff * defaultStickMax).toInt()
                         vertical = (eyDiff * defaultStickMax).toInt()
                         height = (ezDiff * defaultStickMax * 10/3).toInt()
-                    }
-                    else if (pointsDiff in .15f .. .45f) { // 45cm以内
-                        horizon = (exDiff * ((defaultStickMax-nearbyStickMax)/.30*pointsDiff-28.1)).toInt()
-                        vertical = (eyDiff * ((defaultStickMax-nearbyStickMax)/.30*pointsDiff)-28.1).toInt()
-                        height = (ezDiff * ((defaultStickMax-nearbyStickMax)/.30*pointsDiff-28.1)*10/3 ).toInt()
-                    }else{ // 15cm以内
-                        horizon = (exDiff * nearbyStickMax).toInt()
-                        vertical = (eyDiff * nearbyStickMax).toInt()
-                        height = (ezDiff * nearbyStickMax * 10/3).toInt()
+//                        height = (ezDiff * defaultStickMax * 3).toInt()
+                    }else{
+                        val expY = 25*1.1.pow(pointsDiff.toDouble()*100)-25
+                        horizon = (exDiff * expY).toInt()
+                        vertical = (eyDiff * expY).toInt()
+                        height = (ezDiff * expY * 10/3).toInt()
+//                        height = (exDiff * expY * 3).toInt()
                     }
 
                     // 実際のドローン操作

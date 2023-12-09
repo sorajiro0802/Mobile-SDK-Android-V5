@@ -180,7 +180,7 @@ class VirtualStickFragment : DJIFragment() {
             })
         }
         btn_set_virtual_stick_speed_level.setOnClickListener {
-            val speedLevels = doubleArrayOf(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+            val speedLevels = doubleArrayOf(0.002, 0.003, 0.004 ,0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
             initPopupNumberPicker(Helper.makeList(speedLevels)) {
                 virtualStickVM.setSpeedLevel(speedLevels[indexChosen[0]])
                 resetIndex()
@@ -268,8 +268,7 @@ class VirtualStickFragment : DJIFragment() {
             scriptFile = sp_choose_script.selectedItem.toString()
             val scriptPath = "$scriptDir/$scriptFile"
             selfdrivevm.setScenarioScript(scriptPath)
-            // スピードセット．バックグラウンドスレッドでは設定できないため先に設定しておく．0.05がちょうどいい．(水平・垂直最大： 50cm/s, 上下最大： 15cm/s)
-            val speed = 0.05
+            val speed = 0.04 // dji mini3 pro 用
             virtualStickVM.setSpeedLevel(speed)
             selfdrivevm.executeScript()
         }
