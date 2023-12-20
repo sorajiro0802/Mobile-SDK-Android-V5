@@ -23,8 +23,10 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private var tolerance = .02f  // a.bcd  a:meter, b:10 centi meter, c:centi meter, d:milli meter
     private val pjob = CoroutineScope(EmptyCoroutineContext)
     private val defaultStickMax = 165 // 125 mm/s
-    private val nearbyStickMax = 39.6 // 30 mm/s
-
+    private var prevError = .0f
+    private val Kp = 700 // speed level = 0.05
+    private val Kd = 1200
+    private var prevErrorDifference = 0f
     private lateinit var scenarioFile: File
 
     fun executeScript() {
