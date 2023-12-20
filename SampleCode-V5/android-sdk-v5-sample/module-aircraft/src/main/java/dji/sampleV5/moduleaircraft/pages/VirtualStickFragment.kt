@@ -269,7 +269,7 @@ class VirtualStickFragment : DJIFragment() {
             val scriptPath = "$scriptDir/$scriptFile"
             selfdrivevm.setScenarioScript(scriptPath)
 //            val speed = 0.05 // dji mini3 pro 用
-            val speed = 0.02
+            val speed = 0.02 // dji matrice 350 rtk 用
             virtualStickVM.setSpeedLevel(speed)
             selfdrivevm.executeScript()
         }
@@ -342,6 +342,11 @@ class VirtualStickFragment : DJIFragment() {
     // Disconnect TS16
     private fun disconnectTSBtnListener() {
         bt_disconnectTS.setOnClickListener {
+            // file save before disconnecting Total Station
+            if (tsData.size > 0) {
+                LeicaSaver.save(tsData)
+                tsData.clear()
+            }
             leicaCtlVM.close()
             ToastUtils.showToast("Disconnect")
 
