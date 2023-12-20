@@ -51,9 +51,8 @@ class TimeSyncVM() : DJIViewModel() {
                 sendTimeLog.add("$cnt,${getNowDate()}")
                 cnt++
                 send("send")
-
-                sleep(SLEEP_TIME)
                 receive()
+                sleep(SLEEP_TIME)
             }
         }
 
