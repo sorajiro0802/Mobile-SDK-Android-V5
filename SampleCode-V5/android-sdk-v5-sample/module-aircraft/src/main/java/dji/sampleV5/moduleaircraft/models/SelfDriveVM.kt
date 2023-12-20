@@ -68,12 +68,16 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
             var arriveCnt = 0
             // check Data stream whether TS16 is alive
             observerFlag = valueObserver.getUpdatingStatus()
+            // init error and its difference value
+            var error = calcL2Norm(targetPos, currDronePoint)
+            prevError = error
             while(observerFlag){
                 if(movable) {
                     isMoving = true
                     // 到着したかどうかの判定
-                    val pointsDiff = calcL2Norm(targetPos, currDronePoint)
-                    if (tolerance > pointsDiff) {
+                    error = calcL2Norm(targetPos, currDronePoint)
+
+                    if (tolerance > error) {
                         arriveCnt++
                         if (arriveCnt > 10) {
                             Log.d(TAG, "Arrived!")
@@ -89,16 +93,22 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     val xDiff = targetPos[0] - currDronePoint[0]
                     val yDiff = targetPos[1] - currDronePoint[1]
                     val zDiff = targetPos[2] - currDronePoint[2]
-                    val exDiff = xDiff/pointsDiff
-                    val eyDiff = yDiff/pointsDiff
-                    val ezDiff = zDiff/pointsDiff
+                    val exDiff = xDiff/error
+                    val eyDiff = yDiff/error
+                    val ezDiff = zDiff/error
+                    // 偏差の微分
+                    val errorDifference = if ( error != prevError) { // 値が更新されていなかった場合は，最終更新微分値を使う
+                        error - prevError
+                    } else {
+                        prevErrorDifference
+                    }
 
                     // 方向ベクトルの各成分の単位ベクトルを元に移動
-                    var horizon = 0
-                    var vertical = 0
-                    var height = 0
-                    // 目的点付近で振動しないよう，一定の閾値を超えたらスピードを更に緩める
-                    if (.212f < pointsDiff){
+                    var horizon: Int
+                    var vertical: Int
+                    var height: Int
+
+                    /*if (2.0f < error){
                         horizon = (exDiff * defaultStickMax).toInt()
                         vertical = (eyDiff * defaultStickMax).toInt()
                         height = (ezDiff * defaultStickMax * 10/3).toInt()
@@ -110,13 +120,25 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                         height = (ezDiff * expY * 10/3).toInt()
 //                        height = (exDiff * expY * 3).toInt()
                     }
-
+                    */
+                    // PD制御の操作量
+                    val tau = Kp*error + Kd*errorDifference
+                    if (tau < defaultStickMax) {
+                        horizon = (exDiff * tau).toInt()
+                        vertical = (eyDiff * tau).toInt()
+                        height = (ezDiff * tau*10/3).toInt()
+                    } else {
+                        horizon = (exDiff * defaultStickMax).toInt()
+                        vertical = (eyDiff * defaultStickMax).toInt()
+                        height = (ezDiff * defaultStickMax*10/3).toInt()
+                    }
                     // 実際のドローン操作
 //                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
                     virtualStickVM.setRightPosition(horizon, vertical)
                     virtualStickVM.setLeftPosition(0, height)
 
                     sleep(100L)
+                    prevError = error
                     observerFlag = valueObserver.getUpdatingStatus()
                 } else {
 //                    Log.d(TAG, "stop moving")
