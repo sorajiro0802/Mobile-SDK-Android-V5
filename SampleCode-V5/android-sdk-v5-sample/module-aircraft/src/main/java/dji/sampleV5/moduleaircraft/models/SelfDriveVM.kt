@@ -12,8 +12,8 @@ import kotlin.math.*
 
 class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private val TAG = "SelfDriveVM"
-    private var isMoving = false
-    private var movable = true
+    private var isMoving = false // for emergency situation
+    private var movable = true // for stop button
     private var calibOriginPos: FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     private var calibXAxisPos: FloatArray = floatArrayOf(0.0f, 0.0f, 0.0f)
     private var calibZOffsetPos: Float = .0f
@@ -24,6 +24,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private val pjob = CoroutineScope(EmptyCoroutineContext)
     private val defaultStickMax = 165 // 125 mm/s
     private var prevError = .0f
+    // PD Controlling Gain
     private val Kp = 1500 // speed level = 0.02
     private val Kd = 3000 //
     private var prevErrorDifference = 0f
@@ -74,10 +75,11 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
             while(observerFlag){
                 if(movable) {
                     isMoving = true
-                    // 到着したかどうかの判定
-                    error = calcL2Norm(targetPos, currDronePoint)
 
+                    // 到着判定
+                    error = calcL2Norm(targetPos, currDronePoint)
                     if (tolerance > error) {
+                        // 0.1secで更新されるwhileで10カウント．1秒間tolerance内にいると到着
                         arriveCnt++
                         if (arriveCnt > 10) {
                             Log.d(TAG, "Arrived!")
@@ -93,6 +95,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     val xDiff = targetPos[0] - currDronePoint[0]
                     val yDiff = targetPos[1] - currDronePoint[1]
                     val zDiff = targetPos[2] - currDronePoint[2]
+                    // 方向ベクトルの単位ベクトル成分
                     val exDiff = xDiff/error
                     val eyDiff = yDiff/error
                     val ezDiff = zDiff/error
@@ -150,16 +153,18 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     }
 
     private fun convertCoordinateTS2UAV(tsPos:FloatArray):FloatArray {
+        // TotalStationから取得した座標系を，任意の座標系に変換する
+        // 原点pos, x軸方向pos の情報から，移動・回転処理を施すことで実現
+
         val convertedPos = floatArrayOf(.0f, .0f, .0f)
         // index  0:x, 1:y, 2:z
         val x = -tsPos[0]; val y = tsPos[1]; val z = tsPos[2] // arbitrary Point for convert
         val x0 = -calibOriginPos[0]; val y0 = calibOriginPos[1]  // TS Axes info
         val x1 = -calibXAxisPos[0]; val y1 = calibXAxisPos[1]
-
+        // x軸方向ベクトルpxとTS座標系のx軸とのなす角
         val px = x1-x0
         val absP = calcL2Norm(calibOriginPos, calibXAxisPos)
-
-        val theta = if (y1 > y0) {
+        val theta = if (y1 > y0) { // arcCosの値域をカバー
             acos(px/absP)
         }else {
             -acos(px/absP)
@@ -199,6 +204,7 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
         isMoving = true
     }
 
+    // TODO コルーチンpjobのキャンセルができないため，自動操縦スレッドを強制修了することができない．直したい.
     fun resetMoving() {
         try {
             pjob.cancel()

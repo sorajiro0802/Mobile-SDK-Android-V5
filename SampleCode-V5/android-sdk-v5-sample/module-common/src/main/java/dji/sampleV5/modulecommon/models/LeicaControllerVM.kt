@@ -9,7 +9,6 @@ class LeicaControllerVM() : DJIViewModel(){
     private val TAG = "LeicaControllerVM"
     private var connection = false
     private val macAddr: String = "D4:36:39:77:DC:92" // MacAddress of Total Station Leica TS16
-    val isDataComing : MutableLiveData<Boolean> = MutableLiveData<Boolean>()
 
     var btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
     var btDevice: BluetoothDevice = btAdapter!!.getRemoteDevice(this.macAddr)

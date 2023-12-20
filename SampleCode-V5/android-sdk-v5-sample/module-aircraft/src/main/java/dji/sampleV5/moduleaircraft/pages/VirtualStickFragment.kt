@@ -60,18 +60,18 @@ class VirtualStickFragment : DJIFragment() {
     // TS data receiver
     private var tsData = mutableListOf<String>()
     private var prismPos :FloatArray = floatArrayOf(0f,0f,0f)
+
+    // for remember previous 3-values for UAV Coordinate
     lateinit var pref: SharedPreferences
     private val originKey = "origin"
     private val xAxisKey = "xAxis"
     private val zPosKey = "zPos"
     // saver
     private val LeicaSaver = SaveList()
-    val homeDir = Environment.getExternalStorageDirectory().absolutePath
+    private val homeDir = Environment.getExternalStorageDirectory().absolutePath
     // シナリオスクリプトを置いておくフォルダ
-    val scriptDir = "$homeDir/Scripts"
-    var scriptFile = ""
-
-
+    private val scriptDir = "$homeDir/Scripts"
+    private var scriptFile = ""
 
 
     override fun onCreateView(
@@ -130,7 +130,7 @@ class VirtualStickFragment : DJIFragment() {
             val saveBatchSize = 100
             if(tsData.size >= saveBatchSize){
                 val time = LeicaSaver.save(tsData)
-                ToastUtils.showToast("FileSaveTime : $time ms")
+//                ToastUtils.showToast("FileSaveTime : $time ms")
                 tsData.clear()
             }
         }
@@ -263,13 +263,15 @@ class VirtualStickFragment : DJIFragment() {
         scriptSpinner.adapter = adapter
     }
 
+    // ---- self drive button ----
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
+            // set script file from chosen by UI
             scriptFile = sp_choose_script.selectedItem.toString()
             val scriptPath = "$scriptDir/$scriptFile"
             selfdrivevm.setScenarioScript(scriptPath)
-//            val speed = 0.05 // dji mini3 pro 用
-            val speed = 0.02 // dji matrice 350 rtk 用
+//            val speed = 0.05 // dji mini3 pro
+            val speed = 0.02 // dji matrice 350 rtk
             virtualStickVM.setSpeedLevel(speed)
             selfdrivevm.executeScript()
         }
@@ -277,15 +279,17 @@ class VirtualStickFragment : DJIFragment() {
     private fun selfDriveStopBtnListener(){btn_selfDrive_stop.setOnClickListener { selfdrivevm.stopMoving() }}
     private fun selfDriveContinueBtnListener(){btn_selfDrive_continue.setOnClickListener { selfdrivevm.continueMoving() }}
     private fun selfDriveResetBtnListener(){btn_selfDrive_reset.setOnClickListener { selfdrivevm.resetMoving() }}
-
+    // set origin position for calibrating UAV coordinate
     private fun setOriginBtnListener(){bt_setOrigin.setOnClickListener {
         selfdrivevm.setOriginPos(prismPos)
         writePreferences(originKey, prismPos.contentToString())
     }}
+    // set X-Axis direction position for calibrating UAV coordinate
     private fun setXAxisBtnListener(){bt_setXAxis.setOnClickListener {
         selfdrivevm.setXAxisPos(prismPos)
         writePreferences(xAxisKey, prismPos.contentToString())
     }}
+    // set Z-offset for calibrating UAV coordinate
     private fun setZPosOffsetBtnListener(){bt_setZPosOffset.setOnClickListener {
         selfdrivevm.setZPosOffset(prismPos[2])
         writePreferences(zPosKey, prismPos[2].toString())
