@@ -108,32 +108,21 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
                     var vertical: Int
                     var height: Int
 
-                    /*if (2.0f < error){
-                        horizon = (exDiff * defaultStickMax).toInt()
-                        vertical = (eyDiff * defaultStickMax).toInt()
-                        height = (ezDiff * defaultStickMax * 10/3).toInt()
-//                        height = (ezDiff * defaultStickMax * 3).toInt()
-                    }else{
-                        val expY = 25*1.1.pow(pointsDiff.toDouble()*100)-25
-                        horizon = (exDiff * expY).toInt()
-                        vertical = (eyDiff * expY).toInt()
-                        height = (ezDiff * expY * 10/3).toInt()
-//                        height = (exDiff * expY * 3).toInt()
-                    }
-                    */
                     // PD制御の操作量
                     val tau = Kp*error + Kd*errorDifference
                     if (tau < defaultStickMax) {
                         horizon = (exDiff * tau).toInt()
                         vertical = (eyDiff * tau).toInt()
-                        height = (ezDiff * tau*10/3).toInt()
+//                        height = (ezDiff * tau*10/3).toInt()
+                        height = (ezDiff * tau*3).toInt()
                     } else {
                         horizon = (exDiff * defaultStickMax).toInt()
                         vertical = (eyDiff * defaultStickMax).toInt()
-                        height = (ezDiff * defaultStickMax*10/3).toInt()
+//                        height = (ezDiff * defaultStickMax*10/3).toInt()
+                        height = (ezDiff * defaultStickMax*3).toInt()
                     }
                     // 実際のドローン操作
-//                    Log.d(TAG,"vertical(R):$vertical,horizon(R):$horizon,height:$height")
+                    Log.d(TAG,"dist:$error,differenceDist$errorDifference,vert:$vertical,hori:$horizon,height:$height")
                     virtualStickVM.setRightPosition(horizon, vertical)
                     virtualStickVM.setLeftPosition(0, height)
 
