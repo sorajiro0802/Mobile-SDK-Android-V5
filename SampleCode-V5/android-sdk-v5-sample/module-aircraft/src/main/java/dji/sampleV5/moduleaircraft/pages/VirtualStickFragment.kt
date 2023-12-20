@@ -268,7 +268,8 @@ class VirtualStickFragment : DJIFragment() {
             scriptFile = sp_choose_script.selectedItem.toString()
             val scriptPath = "$scriptDir/$scriptFile"
             selfdrivevm.setScenarioScript(scriptPath)
-            val speed = 0.04 // dji mini3 pro 用
+//            val speed = 0.05 // dji mini3 pro 用
+            val speed = 0.02
             virtualStickVM.setSpeedLevel(speed)
             selfdrivevm.executeScript()
         }

@@ -24,8 +24,8 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private val pjob = CoroutineScope(EmptyCoroutineContext)
     private val defaultStickMax = 165 // 125 mm/s
     private var prevError = .0f
-    private val Kp = 700 // speed level = 0.05
-    private val Kd = 1200
+    private val Kp = 1500 // speed level = 0.02
+    private val Kd = 3000 //
     private var prevErrorDifference = 0f
     private lateinit var scenarioFile: File
 
