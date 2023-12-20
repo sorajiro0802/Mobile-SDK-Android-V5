@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import dji.sampleV5.modulecommon.models.*
 import dji.sampleV5.modulecommon.util.Helper
 import dji.sampleV5.modulecommon.util.ToastUtils
@@ -100,7 +99,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
         val timeSyncSaver = SaveList()
         var cnt = 0
 
-        timeSyncBtn.setOnClickListener(View.OnClickListener {
+        timeSyncBtn.setOnClickListener {
             // Button Toggle
             it.isEnabled = false
             timeSyncStopBtn.isEnabled = true
@@ -118,9 +117,9 @@ abstract class DJIMainActivity : AppCompatActivity() {
             val filepath = "$saveDir/$filename"
             timeSyncSaver.set(filepath)
 
-        })
+        }
 
-        timeSyncStopBtn.setOnClickListener(View.OnClickListener {
+        timeSyncStopBtn.setOnClickListener {
             // Button Toggle
             it.isEnabled = false
             timeSyncBtn.isEnabled = true
@@ -133,10 +132,10 @@ abstract class DJIMainActivity : AppCompatActivity() {
 
             Log.d("FileSaveTime TS Data", "$time ms")
             timesyncData.clear()
-        })
+        }
 
         // 時間同期サーバから受信した時間データ
-        timesync.serverTime.observe(this, Observer{
+        timesync.serverTime.observe(this) {
             Log.d(tag, "Data:$it")
             // 改行コードを抜く
             val server_date = it.replace("\n", "")
@@ -145,19 +144,19 @@ abstract class DJIMainActivity : AppCompatActivity() {
             cnt++
 
             val timediff = timesync.calcTimeDiff(server_date, client_data)
-            timeDiff.text = "time diff: $timediff ms"
-        })
+            timeDiff.text = "time diff: $timediff s"
+        }
 
 
         //////////////////////////////////  Total Station  //////////////////////////////////
-        val TSConnectBtn: Button = findViewById<Button>(R.id.bt_connectTS)
-        val TSReadBtn: Button = findViewById<Button>(R.id.bt_readTS)
-        val TSStopBtn: Button = findViewById<Button>(R.id.bt_stopTS)
-        val TSDisconnectBtn: Button = findViewById<Button>(R.id.bt_disconnectTS)
+        val TSConnectBtn: Button = findViewById(R.id.bt_connectTS)
+        val TSReadBtn: Button = findViewById(R.id.bt_readTS)
+        val TSStopBtn: Button = findViewById(R.id.bt_stopTS)
+        val TSDisconnectBtn: Button = findViewById(R.id.bt_disconnectTS)
         val LeicaSaver = SaveList()
-        val tvLeicaValue: TextView = findViewById<TextView>(R.id.tv_leicaValue)
+        val tvLeicaValue: TextView = findViewById(R.id.tv_leicaValue)
         // Connection for TS16
-        TSConnectBtn.setOnClickListener{v->(
+        TSConnectBtn.setOnClickListener {
                     if(msdkInfoVm.leicaController.connect() == 0){
                         Log.d(tag, "successfully connected")
                         this.exceptionToast("Success connecting to TS16")
@@ -167,9 +166,9 @@ abstract class DJIMainActivity : AppCompatActivity() {
                         this.exceptionToast("Failed connecting to TS16")
                         msdkInfoVm.updateTSConnectionStatus()
                     }
-            )}
+            }
         // Reading
-        TSReadBtn.setOnClickListener(View.OnClickListener{
+        TSReadBtn.setOnClickListener {
             msdkInfoVm.leicaController.read()
             // for saving log
             val homeDir = Environment.getExternalStorageDirectory().absolutePath
@@ -178,20 +177,20 @@ abstract class DJIMainActivity : AppCompatActivity() {
             val filename = "leicaPosLog_${getDate4filename()}.txt"
             val filepath = "$saveDir/$filename"
             LeicaSaver.set(filepath)
-        })
-        msdkInfoVm.leicaController.leicaValue.observe(this, Observer {
+        }
+        msdkInfoVm.leicaController.leicaValue.observe(this) {
             tvLeicaValue.text = StringUtils.getResStr(R.string.tv_leicaValue, it)
             posData.add(it)
 
             // TS16で取得したデータを保存する
             val saveBatchSize = 100
 
-            if(posData.size >= saveBatchSize){
-                var time = LeicaSaver.save(posData)
+            if (posData.size >= saveBatchSize) {
+                val time = LeicaSaver.save(posData)
                 Log.d("FileSaveTime TS Data", "$time ms")
                 posData.clear()
             }
-        })
+        }
 
         // Stop Reading
         TSStopBtn.setOnClickListener {
