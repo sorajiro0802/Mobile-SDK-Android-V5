@@ -266,6 +266,11 @@ class VirtualStickFragment : DJIFragment() {
     // ---- self drive button ----
     private fun selfDriveStartBtnListener() {
         btn_selfDrive_start.setOnClickListener {
+            // switch target UAV
+//            val target = "mini3pro"
+            val target = "matrice350rtk"
+            selfdrivevm.setTargetUAV(target)
+
             // set script file from chosen by UI
             scriptFile = sp_choose_script.selectedItem.toString()
             val scriptPath = "$scriptDir/$scriptFile"

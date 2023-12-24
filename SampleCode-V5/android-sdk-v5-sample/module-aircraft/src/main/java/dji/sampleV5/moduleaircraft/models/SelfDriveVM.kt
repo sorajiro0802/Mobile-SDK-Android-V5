@@ -25,8 +25,8 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
     private val defaultStickMax = 165 // 125 mm/s
     private var prevError = .0f
     // PD Controlling Gain
-    private val Kp = 1500 // speed level = 0.02
-    private val Kd = 3000 //
+    private var Kp = 1500 // speed level = 0.02
+    private var Kd = 3000 //
     private var prevErrorDifference = 0f
     private lateinit var scenarioFile: File
 
@@ -178,6 +178,30 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
         convertedPos[1] = round(((x-x0)*sin(-theta) + (y-y0)*cos(-theta))*1000)/1000
         convertedPos[2] = z - calibZOffsetPos
         return convertedPos
+    }
+
+    // 制御対象のドローンによって，PD制御のゲインとスピードレベルを変更する
+    fun setTargetUAV(target: String) {
+        val t = target.uppercase()
+        Log.d(TAG, "settle target : $t")
+        when (t) {
+            "MINI3PRO" -> {
+                virtualStickVM.setSpeedLevel(0.05)
+                Kp = 700
+                Kd = 1200
+            }
+            "MATRICE350RTK" -> {
+                virtualStickVM.setSpeedLevel(0.02)
+                Kp = 1500
+                Kd = 3000
+            }
+            else -> {
+                // 弱いスピードレベル・ゲイン
+                virtualStickVM.setSpeedLevel(0.02)
+                Kp = 700
+                Kd = 1200
+            }
+        }
     }
 
     fun setTSPos(TSPos: FloatArray){
