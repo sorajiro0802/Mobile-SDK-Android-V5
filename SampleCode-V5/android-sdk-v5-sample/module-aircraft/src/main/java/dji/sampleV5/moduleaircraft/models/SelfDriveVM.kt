@@ -113,16 +113,21 @@ class SelfDriveVM (val virtualStickVM: VirtualStickVM): DJIViewModel(){
 
                     // PD制御の操作量
                     val tau = Kp*error + Kd*errorDifference
-                    if (tau < defaultStickMax) {
+                    if (-defaultStickMax < tau && tau < defaultStickMax) {
                         horizon = (exDiff * tau).toInt()
                         vertical = (eyDiff * tau).toInt()
 //                        height = (ezDiff * tau*10/3).toInt()
                         height = (ezDiff * tau*3).toInt()
-                    } else {
+                    } else if (tau > 0){
                         horizon = (exDiff * defaultStickMax).toInt()
                         vertical = (eyDiff * defaultStickMax).toInt()
 //                        height = (ezDiff * defaultStickMax*10/3).toInt()
                         height = (ezDiff * defaultStickMax*3).toInt()
+                    } else {
+                        horizon = (exDiff * -defaultStickMax).toInt()
+                        vertical = (eyDiff * -defaultStickMax).toInt()
+//                        height = (ezDiff * defaultStickMax*10/3).toInt()
+                        height = (ezDiff * -defaultStickMax*3).toInt()
                     }
                     // 実際のドローン操作
                     Log.d(TAG,"dist:$error,differenceDist$errorDifference,vert:$vertical,hori:$horizon,height:$height")
